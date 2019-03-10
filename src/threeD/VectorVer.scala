@@ -1,4 +1,4 @@
-package threeD;
+package threeD
 
 class VectorVer(val vector: Array[Array[Double]]) {
     def is1x3 : Option[Array[Array[Double]]] = {
@@ -13,6 +13,11 @@ class VectorVer(val vector: Array[Array[Double]]) {
        case Some(vector) => vector
        case None          => throw new VectorSizeException(vector.toString())
      }
+   }
+   def minus(another:VectorVer) = {
+     val a = validVector.flatten
+     val b = another.validVector.flatten
+     new VectorVer(a.zip(b).map { case (x, y) => x - y }.grouped(1).toArray)
    }
    
    override def toString()= {
