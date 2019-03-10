@@ -1,0 +1,33 @@
+[33mcommit fb161ae74253f0a55ce7a8999503cf54bd1bf7cd[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: Teemu Saravirta <teemu.saravirta@aalto.fi>
+Date:   Wed Feb 13 19:00:27 2019 +0200
+
+    Tried to add jar file to dependencies
+
+[1mdiff --git a/.cache-main b/.cache-main[m
+[1mnew file mode 100644[m
+[1mindex 0000000..fd18043[m
+Binary files /dev/null and b/.cache-main differ
+[1mdiff --git a/.classpath b/.classpath[m
+[1mindex dc96463..4bb4c82 100644[m
+[1m--- a/.classpath[m
+[1m+++ b/.classpath[m
+[36m@@ -3,6 +3,6 @@[m
+ 	<classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>[m
+ 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>[m
+ 	<classpathentry kind="src" path="src"/>[m
+[31m-	<classpathentry kind="lib" path="C:/Users/teemu/Documents/scalafx_2.12-8.0.181-R13.jar"/>[m
+[32m+[m	[32m<classpathentry kind="lib" path="U:/Users/Teemu/Desktop/scales/3d_project/JAR_Dependency/scalafx_2.12-8.0.181-R13.jar"/>[m
+ 	<classpathentry kind="output" path="bin"/>[m
+ </classpath>[m
+[1mdiff --git a/.gitignore b/.gitignore[m
+[1mnew file mode 100644[m
+[1mindex 0000000..ae3c172[m
+[1m--- /dev/null[m
+[1m+++ b/.gitignore[m
+[36m@@ -0,0 +1 @@[m
+[32m+[m[32m/bin/[m
+[1mdiff --git a/JAR_Dependency/scalafx_2.12-8.0.181-R13.jar b/JAR_Dependency/scalafx_2.12-8.0.181-R13.jar[m
+[1mnew file mode 100644[m
+[1mindex 0000000..3065e44[m
+Binary files /dev/null and b/JAR_Dependency/scalafx_2.12-8.0.181-R13.jar differ
