@@ -6,16 +6,16 @@ import scala.collection.mutable.Buffer
 object CSVReader {
   def readCSV: Array[Array[Double]] = {
     try { 
-      val csv = Source.fromFile("U:/Users/Teemu/Desktop/scales/3d_project/src/threeD/data.csv").getLines().toArray
+      val csv = Source.fromFile("U:/Users/Teemu/Desktop/scales/3d_project/src/threeD/corner1.csv").getLines().toArray
       val coordinates = Buffer[Array[Double]]()
       for (line <- csv) {
         coordinates += line.split(';').map(x => x.replace(',', '.').toDouble)
       }
-      for (a <- coordinates) {
-        for (b<- a) {
-          println(b)
-        }
-      }
+//      for (a <- coordinates) {
+//        for (b<- a) {
+//          println(b)
+//        }
+//      }
       coordinates.toArray
     } catch {
       case e: FileNotFoundException => println("Couldn't find that file.") ; Array(Array(-1.0))

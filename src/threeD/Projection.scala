@@ -4,7 +4,7 @@ import scala.math._
 object Converter {
   def read = {
     var data: Array[Array[Double]] = CSVReader.readCSV
-    println(data.length)
+//    println(data.length)
     var vectors = Buffer[Array[VectorVer]]()
     for (line <- data) {
       var triangle = line.grouped(3).toArray
@@ -29,7 +29,7 @@ object Projector {
     def transformationMatrix3 = new Matrix(Array(Array(cos(rotation(2)),sin(rotation(2)),0),Array(-sin(rotation(2)), cos(rotation(2)), 0),Array(0,0,1)))
     val transform = (transformationMatrix1.multiplyWithMatrix(transformationMatrix2)).multiplyWithMatrix(transformationMatrix3)
     
-    val e = Vector(0,0,0.1)
+    val e = Vector(0,0,-0.5)
     var newData = Buffer[Array[VectorVer]]()
     for (triangle <- data) {
       var triangles = Buffer[VectorVer]()
@@ -49,7 +49,7 @@ object Projector {
         val projected: (Double, Double) = (x,y)
         triangleReformated.append(projected)
       }
-      triangleReformated.foreach(println(_))
+//      triangleReformated.foreach(println(_))
       dReformated.append(triangleReformated.toArray)
     }
     dReformated.toArray
