@@ -23,3 +23,4 @@ Cartesian coordinate system was left handed instead of right handed, and the eas
 where x is the one going right, z up, and y forward, from the starting orientation.
 Started to make both Excel and CSVMaker on Eclipse, and came to the conclusion that for SCALAbility, it's best to make it in Eclipse.
 Cannot figure out how to write to file. Also paths to files seem to not be working. In CSVReader couldn't get it to work with only relative data path.
+Est Total Time <20h
