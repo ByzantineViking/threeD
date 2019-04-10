@@ -11,7 +11,16 @@ class VectorVer(val vector: Array[Array[Double]]) {
    val validVector = {
      is1x3 match {
        case Some(vector) => vector
-       case None          => throw new VectorSizeException(vector.toString())
+       case None          => throw new VectorSizeException({
+         var holder = ""
+         for (row <- vector) {
+           for (i <- row) {
+             holder += "i"
+           }
+           holder += "\n"
+         }
+         holder
+       })
      }
    }
    def minus(another:VectorVer) = {

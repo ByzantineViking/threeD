@@ -3,10 +3,16 @@ import scala.io.Source
 import java.io.{FileNotFoundException, IOException}
 import java.lang.NumberFormatException
 import scala.collection.mutable.Buffer
+import java.nio.file.Path
+import java.nio.file.Paths
 object CSVReader {
   def readCSV: Array[Array[Double]] = {
     try { 
-      val csv = Source.fromFile("U:/Users/Teemu/Desktop/scales/3d_project/src/threeD/corner1.csv").getLines().toArray
+      //Finding the file
+      val currentDir = Paths.get(".").toAbsolutePath().normalize().toString()
+      val filePath = currentDir + "/src/resources/"
+      val file = filePath + "data.csv"
+      val csv = Source.fromFile(file).getLines().toArray
       val coordinates = Buffer[Array[Double]]()
       for (line <- csv) {
         coordinates += line.split(';').map(x => x.replace(',', '.').toDouble)

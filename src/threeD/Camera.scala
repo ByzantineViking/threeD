@@ -11,4 +11,7 @@ class Camera {
     var temp = pos.validVector
     pos = new VectorVer(Array(Array(temp(0)(0) + xMovement),Array(temp(1)(0) + yMovement), Array(temp(2)(0) + zMovement)))
   }
+  def resetPos = {
+    pos = new VectorVer(Array(Array(0), Array(0), Array(0)))
+  }
 }
