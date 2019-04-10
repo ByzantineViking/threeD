@@ -17,3 +17,10 @@ So the fault is in my opinion in the Projector-object.
     Camera, which holds rotation and position, and methods to change those. Should work, as the Projection takes out the
 camera coordinates, and sets camera to origo, so it's surprisingly simple.
 Est Total Time <15h
+
+19.3:
+Cartesian coordinate system was left handed instead of right handed, and the easiest solve was changing the format from (x,y,z) to (x,z,y)
+where x is the one going right, z up, and y forward, from the starting orientation.
+Started to make both Excel and CSVMaker on Eclipse, and came to the conclusion that for SCALAbility, it's best to make it in Eclipse.
+Cannot figure out how to write to file. Also paths to files seem to not be working. In CSVReader couldn't get it to work with only relative data path.
+Est Total Time <20h
