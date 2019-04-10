@@ -24,3 +24,14 @@ where x is the one going right, z up, and y forward, from the starting orientati
 Started to make both Excel and CSVMaker on Eclipse, and came to the conclusion that for SCALAbility, it's best to make it in Eclipse.
 Cannot figure out how to write to file. Also paths to files seem to not be working. In CSVReader couldn't get it to work with only relative data path.
 Est Total Time <20h
+
+10.4:
+Finally got a working product. Ended up moving all the points in the world, which can be thought of as more demanding than just
+giving a camera new coordinates. Problem was that the Cameras provided by JavaFX for example PerspectiveCamera, weren't fit
+for this problem. A particularly funny points was when the boxes were not moving, but with (still faulty)  my distance calculation
+algorithm the different parts of the boxes knew how to orient themselves regarding to my ghost camera moving around.
+The algorithm does okay for certain types of shapes, but especially for triangles in vastly different orientations, it fails, as 
+one triangle should be in front but it has two "heavy points" on the back and only one close by.
+Built a slope. A lot of debugging. This particular camera transform has proven to be rather tedious, but it is now too integrated in to switch.
+Mostly it manifests itself in the horizontal mirroring.
+Est Total Time <25h
