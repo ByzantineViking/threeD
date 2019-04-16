@@ -23,6 +23,11 @@ class VectorVer(val vector: Array[Array[Double]]) {
        })
      }
    }
+   def x = this.validVector(0)(0)
+  def z = this.validVector(1)(0)
+  def y = this.validVector(2)(0)
+   
+   
    def minus(another:VectorVer) = {
      val a = validVector.flatten
      val b = another.validVector.flatten

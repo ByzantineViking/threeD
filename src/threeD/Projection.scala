@@ -4,7 +4,6 @@ import scala.math._
 object Converter {
   def read = {
     var data: Array[Array[Double]] = CSVReader.readCSV
-//    println(data.length)
     var vectors = Buffer[Array[VectorVer]]()
     for (line <- data) {
       var shape = line.grouped(3).toArray
@@ -98,31 +97,53 @@ object Projector {
     dReformated.toArray
   }
   
-  def update(array:  Array[Array[VectorVer]]) : ( Array[Array[(Double,Double)]], Array[Array[VectorVer]] ) = {
-    val holder = Buffer[Array[VectorVer]]()
-    val rotation = Front.kamera.rotation
+  def updateOrigo(origo: VectorVer): VectorVer = {
     var cameraPos = Front.kamera.pos
-    for (row <- array) {
-      val holderRow = Buffer[VectorVer]()
-      for (vector <- row) {
-        holderRow += 
-                  new VectorVer(Array(
+    new VectorVer(Array(
                     Array(
-                      vector.validVector(0)(0) - cameraPos.validVector(0)(0)
+                      origo.validVector(0)(0) - cameraPos.validVector(0)(0)
                     ), Array(
-                      vector.validVector(1)(0) - cameraPos.validVector(1)(0)
+                      origo.validVector(1)(0) - cameraPos.validVector(1)(0)
                     ), Array(
-                      vector.validVector(2)(0) - cameraPos.validVector(2)(0)
+                      origo.validVector(2)(0) - cameraPos.validVector(2)(0)
                     )
                   ))
-      }
-      holder += holderRow.toArray
-    }
-    Front.kamera.resetPos
-    cameraPos = Front.kamera.pos
-    val data = holder.toArray
-        
-        
+  }
+  
+  def update(array:  Array[Array[VectorVer]]) : ( Array[Array[(Double,Double)]], Array[Array[VectorVer]] ) = {
+    // Moving the world according to rotation, and player's movement. These values are refreshed to stay at zero, and at each tick,
+    // their values are "added" to all the points in the world.
+    // Rotation
+//    val cameraRot = Front.kamera.rotation
+    // Position
+//    println(cameraRot)
+//    val holder = Buffer[Array[VectorVer]]()
+    var cameraPos = Front.kamera.pos
+//    for (row <- array) {
+//      val holderRow = Buffer[VectorVer]()
+//      for (vector <- row) {
+//        holderRow += 
+//                  new VectorVer(Array(
+//                    Array({
+////                      val rotated = cos(cameraRot(0)) * sqrt(pow(vector.validVector(0)(0), 2) + pow(vector.validVector(1)(0), 2));
+////                      rotated - cameraPos.validVector(0)(0)
+//                      vector.validVector(0)(0) - cameraPos.validVector(0)(0)
+//                    }), Array(
+//                      vector.validVector(1)(0) - cameraPos.validVector(1)(0)
+//                    ), Array(
+//                      vector.validVector(2)(0) - cameraPos.validVector(2)(0)
+//                    )
+//                  ))
+//      }
+//      holder += holderRow.toArray
+//    }
+//    Front.kamera.resetRot
+//    Front.kamera.resetPos
+//    cameraPos = Front.kamera.pos
+    val rotation = Front.kamera.rotation
+//    val data = holder.toArray
+        val data = array
+    // Transforming the 3D matrix into 2D-plane.
     def transformationMatrix1 = new Matrix(Array(Array(1,0,0),Array(0, cos(rotation(0)), sin(rotation(0))),Array(0,-sin(rotation(0)),cos(rotation(0)))))
     def transformationMatrix2 = new Matrix(Array(Array(cos(rotation(1)),0,-sin(rotation(1))),Array(0, 1, 0),Array(sin(rotation(1)),0,cos(rotation(1)))))
     def transformationMatrix3 = new Matrix(Array(Array(cos(rotation(2)),sin(rotation(2)),0),Array(-sin(rotation(2)), cos(rotation(2)), 0),Array(0,0,1)))
@@ -135,7 +156,7 @@ object Projector {
       for  (point <- shape) {
         shapes.append(transform.multiplyWithVector(point.minus(cameraPos)))
       }
-      newData.append(shape.toArray)
+      newData.append(shapes.toArray)
     }
     val d = newData.toArray
     val dReformated = Buffer[Array[(Double,Double)]]()
@@ -148,7 +169,6 @@ object Projector {
         val projected: (Double, Double) = (x,y)
         shapeReformated.append(projected)
       }
-//      shapeReformated.foreach(println(_))
       dReformated.append(shapeReformated.toArray)
     }
     (dReformated.toArray, data)

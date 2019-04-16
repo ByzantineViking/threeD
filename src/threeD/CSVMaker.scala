@@ -31,17 +31,17 @@ object Writer {
   
   
   // Slope doesn't work in the draw order function.
-//  def slope(x: Double, z: Double, y: Double): String = {
-//    // Coordinates of downleft corner, so the lowest y and lowest z
-//    val lowTriangle =   Array(x    ,z    ,y    ,
-//                              x    ,z+1  ,y+1  ,
-//                              x-1  ,z    ,y    ).mkString(";")
-//    val highTriangle =  Array(x-1  ,z    ,y    ,
-//                              x-1  ,z+1  ,y+1  ,
-//                              x    ,z+1  ,y+1   ).mkString(";")
-//    val slope: String = lowTriangle + "\n"  + highTriangle + "\n"
-//    slope
-//  }
+  def slope(x: Double, z: Double, y: Double): String = {
+    // Coordinates of downleft corner, so the lowest y and lowest dwwz
+    val lowTriangle =   Array(x    ,z    ,y    ,
+                              x    ,z+1  ,y+1  ,
+                              x-1  ,z    ,y    ).mkString(";")
+    val highTriangle =  Array(x-1  ,z    ,y    ,
+                              x-1  ,z+1  ,y+1  ,
+                              x    ,z+1  ,y+1   ).mkString(";")
+    val slope: String = lowTriangle + "\n"  + highTriangle + "\n"
+    slope
+  }
   
   
   def block(x: Double, z: Double, y: Double): String = {
@@ -61,7 +61,7 @@ object Writer {
     
     //Making the world
     file.write(crossroads(-0.5,-0.5,1))
-//    file.write(slope(0.5, -0.5, 1))
+    file.write(slope(0.5, -0.5, 1))
     
     
     file.close()
