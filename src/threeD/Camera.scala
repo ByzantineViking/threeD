@@ -6,15 +6,14 @@ class Camera {
     rotation = Buffer(rotation(0) + xRotation , rotation(1) + zRotation , rotation(2) + yRotation)
   }
   var pos = new VectorVer(Array(Array(0.0),Array(0.0),Array(0.0)))
-  def x = pos.validVector(0)(0)
-  def z = pos.validVector(1)(0)
-  def y = pos.validVector(2)(0)
+  def x: Double = pos.validVector(0)(0)
+  def z: Double = pos.validVector(1)(0)
+  def y: Double = pos.validVector(2)(0)
   
   def move(xMovement: Double,zMovement: Double,yMovement: Double) = {
-    var temp = pos.validVector
-    pos = new VectorVer(Array(Array(temp(0)(0) + xMovement),Array(temp(1)(0) + zMovement), Array(temp(2)(0) + yMovement)))
+    pos = new VectorVer(Array(Array(pos.x + xMovement),Array(pos.z + zMovement), Array(pos.y + yMovement)))
   }
-  def resetPos = {
-    pos = new VectorVer(Array(Array(0), Array(0), Array(0)))
+  def moveTo(xPos: Double, zPos: Double, yPos: Double) = {
+    pos = new VectorVer(Array(Array(xPos),Array(zPos), Array(yPos)))
   }
 }
