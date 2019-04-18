@@ -61,7 +61,6 @@ object Front extends JFXApp {
     // Setting up
     Writer
     val kamera = new Camera
-    val installData = Converter.read
     var data = Projector.project
     
     
@@ -116,7 +115,6 @@ object Front extends JFXApp {
               val a = convertToCanvas(A)
               val b = convertToCanvas(B)
               val c = convertToCanvas(C)
-              
               
               val path = new Path
               path.elements += MoveTo(a._1, a._2)
@@ -226,7 +224,6 @@ object Front extends JFXApp {
                  timeFromJump = 0.0
               }
               if (spacePressed && doubleJump && kamera.z >= 0.4 && timeFromJump >= 0.4 && jumped && !jumpedTwice) {
-                 println("two")
                  jumping = true
                  jumpedTwice = true
                  velocity = 4.12
@@ -323,7 +320,10 @@ object Front extends JFXApp {
               
          //-------------------------------------------------------------------------------------------//     
               // Drawing the things with graphicsContext2D
-              
+//              var k = data(0)(0)
+//              println("----------------")
+//              println(k)
+//              println(convertToCanvas(k))
               val paths = Buffer[Path]()
               for (shape <- data) {
                 if (shape.length == 3) {

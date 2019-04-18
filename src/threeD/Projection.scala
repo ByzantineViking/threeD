@@ -42,6 +42,8 @@ object Projector {
       newData.append(shapes.toArray)
     }
     val d = newData.toArray
+    
+    
     val dReformated = Buffer[Array[(Double,Double)]]()
     for (shape <- d ) {
       var shapeReformated = Buffer[(Double,Double)]()
