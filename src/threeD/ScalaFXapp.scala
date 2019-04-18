@@ -30,7 +30,7 @@ import scalafx.scene.text._
 //import javafx.animation.AnimationTimer
 import scalafx.animation.AnimationTimer
 
-import scala.math.{sqrt, pow}
+import scala.math.{sqrt, pow, Pi}
 
 
 
@@ -56,12 +56,15 @@ object Front extends JFXApp {
         val heightAspect = 3
         
 //--------------------------------------------------------------------------------//
-        
+        val fileName = "data.csv"
+//--------------------------------------------------------------------------------//
         
     // Setting up
     Writer
     val kamera = new Camera
-    var data = Projector.project
+    var data = Projector.project(kamera)
+    
+    
     
     
     // ScalaFx specific requirements
@@ -89,7 +92,8 @@ object Front extends JFXApp {
     private var spacePressed: Boolean = false
     private var controlPressed: Boolean = false
     private var shiftPressed: Boolean = false
-    
+    private var zoomingIn: Boolean = false
+    private var zoomingOut: Boolean = false
     var userInput = true
     
     stage = new JFXApp.PrimaryStage {
@@ -180,9 +184,9 @@ object Front extends JFXApp {
               // To smooth out the motion, player moves according to the tickrate.
               val delta = (time-lastTime)/1e9 // How much time has passed since last going through timer in seconds
               timeFromJump += delta
-              
               // Reacts to changes in rotation and position.
-              data = Projector.project
+              data = Projector.project(kamera)
+              kamera.roundRotation
               
               // Starts the canvas as a white background.
               gc.fill = Color.White
@@ -279,6 +283,7 @@ object Front extends JFXApp {
                 }
               }
               
+              
          //-------------------------------------------------------------------------------------------//     
               
               // Determining the speed of player
@@ -311,7 +316,11 @@ object Front extends JFXApp {
                   kamera.move(0, 0,truePlayerSpeed * delta)
               }
               
-              
+              if (zoomingIn && !zoomingOut) {
+                kamera.zoomIn
+              } else if (!zoomingIn && zoomingOut) {
+                kamera.zoomOut
+              }
               
               
               
@@ -361,6 +370,9 @@ object Front extends JFXApp {
             case KeyCode.Space   =>  spacePressed     = true
             case KeyCode.Control =>  controlPressed   = true
             case KeyCode.Shift   =>  shiftPressed     = true
+            case KeyCode.Plus    =>  zoomingIn        = true
+            case KeyCode.Minus   =>  zoomingOut       = true
+            case KeyCode.Z       =>  kamera.defaultZoom
             case KeyCode.Escape  =>  System.exit(1)
             case _ =>
           }
@@ -384,6 +396,8 @@ object Front extends JFXApp {
                                      recovering         = true
                                      sprinting          = false
             }
+            case KeyCode.Plus    =>  zoomingIn        = false
+            case KeyCode.Minus   =>  zoomingOut       = false
             case _               =>  
           }
         }
@@ -391,13 +405,13 @@ object Front extends JFXApp {
         onMouseMoved = (event: MouseEvent) => {
             mouseDeltaX = event.screenX - centerPoint._1
             mouseDeltaY = event.screenY - centerPoint._2
-            kamera.rotate(mouseDeltaY * sensitivity , -mouseDeltaX * sensitivity , 0)
+            kamera.rotate(mouseDeltaY * sensitivity / (2*Pi), -mouseDeltaX * sensitivity  / (2*Pi) , 0)
             robot.mouseMove(centerPoint._1.toInt, centerPoint._2.toInt)
         }
         onMouseDragged = (event: MouseEvent) => {
             mouseDeltaX = event.screenX - centerPoint._1
             mouseDeltaY = event.screenY - centerPoint._2
-            kamera.rotate(mouseDeltaY * sensitivity , -mouseDeltaX * sensitivity , 0)
+            kamera.rotate(mouseDeltaY * sensitivity / (2*Pi), -mouseDeltaX * sensitivity  / (2*Pi) , 0)
             robot.mouseMove(centerPoint._1.toInt, centerPoint._2.toInt)
         }
 

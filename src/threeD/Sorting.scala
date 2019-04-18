@@ -4,7 +4,16 @@ import scala.math._
 
 object Sorter {
   
-  // Sorting the vectors ( 3 vectors to represent each end of triangle) by their distance to the kamera
+  
+  def clip(triangle: Array[VectorVer], kamera: Camera) = {
+      MathHelper.distanceFromAPlane(triangle, kamera)
+      
+  }
+  
+  
+  
+  
+  // Sorting the vectors ( 3 vectors to represent each end of triangle) by their summed up distance to the kamera.
   def sort(array: Array[Array[VectorVer]]): Array[Array[VectorVer]] = {
                                          array.sortWith((x, y) => {(
                                          sqrt(pow((x(0).validVector(0)(0) - Front.kamera.pos.validVector(0)(0)), 2))

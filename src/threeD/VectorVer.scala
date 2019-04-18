@@ -13,32 +13,33 @@ class VectorVer(val vector: Array[Array[Double]]) {
    val validVector = {
      is1x3 match {
        case Some(vector) => vector
-       case None          => throw new VectorSizeException({
-         var holder = ""
-         for (row <- vector) {
-           for (i <- row) {
-             holder += "i"
-           }
-           holder += "\n"
-         }
-         holder
-       })
+       case None          => throw new VectorSizeException(this.toString())
      }
    }
    def x = this.validVector(0)(0)
-  def z = this.validVector(1)(0)
-  def y = this.validVector(2)(0)
+   def z = this.validVector(1)(0)
+   def y = this.validVector(2)(0)
    
+   def plus(another:VectorVer) = {
+     val a = validVector.flatten
+     val b = another.validVector.flatten
+     new VectorVer(a.zip(b).map { case (x, y) => x + y }.grouped(1).toArray)
+   }
    
    def minus(another:VectorVer) = {
      val a = validVector.flatten
      val b = another.validVector.flatten
      new VectorVer(a.zip(b).map { case (x, y) => x - y }.grouped(1).toArray)
    }
-   
+   def multiplyWithScalar(scalar: Double): VectorVer = {
+     new VectorVer(Array(Array(this.x * scalar), Array(this.z * scalar), Array(this.y * scalar)))
+   }
    def normalize: VectorVer = {
-     val length: Double = sqrt(pow(this.x,2) + pow(this.z,2) + pow(this.y,2))
-     new VectorVer(Array(Array(this.x /length), Array(this.z/length), Array(this.y/length)))
+     new VectorVer(Array(Array(this.x /this.length), Array(this.z/this.length), Array(this.y/this.length)))
+   }
+   
+   def switchSign: VectorVer = {
+     new VectorVer(Array(Array(-this.x), Array(-this.z), Array(-this.y)))
    }
    
    // Used to calculate normals for visibility calculations.
@@ -49,11 +50,10 @@ class VectorVer(val vector: Array[Array[Double]]) {
      (this.x * another.x) + (this.z * another.z) + (this.y * another.y)
    }
    
+   def length: Double = {
+     sqrt(pow(this.x,2) + pow(this.z,2) + pow(this.y,2))
+   }
    override def toString()= {
-     var output = ""
-     for(row <- validVector) {
-       output = output ++ (row(0).toString() + "\n")
-     }
-     output
+     "\n" + this.x.toString() + " , " + this.z.toString() + " , " + this.y.toString() + "\n"
    }
 }
