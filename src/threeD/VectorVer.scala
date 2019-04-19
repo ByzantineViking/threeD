@@ -11,7 +11,7 @@ class VectorVer(val vector: Array[Array[Double]]) {
       }
     }
    val validVector = {
-     is1x3 match {
+     this.is1x3 match {
        case Some(vector) => vector
        case None          => throw new VectorSizeException(this.toString())
      }

@@ -5,11 +5,6 @@ import scala.math._
 object Sorter {
   
   
-  def clip(triangle: Array[VectorVer], kamera: Camera) = {
-      MathHelper.distanceFromAPlane(triangle, kamera)
-      
-  }
-  
   
   
   

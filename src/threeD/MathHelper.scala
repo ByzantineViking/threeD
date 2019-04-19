@@ -21,29 +21,31 @@ object MathHelper {
   
   // Preferably accuracy would be somewhere around epsilon so cirka 1*10^-6
   // Takes vector between the two points, and shortens it to the intersection point if one exists, otherwise returns None
-  def lineInterSectPlane(point1: VectorVer, point2: VectorVer, planePoint: VectorVer, planeNormal: VectorVer, accuracy: Double): Option[VectorVer] = {
-    var vectorBetweenPoints = point1.minus(point2)
-    if (abs(planeNormal.dotProduct(vectorBetweenPoints)) > accuracy) {
+  /**
+   * The plane normal must be normalized
+   * 
+   * 
+   */
+  def lineInterSectPlane(point1: VectorVer, point2: VectorVer, planePoint: VectorVer, planeNormal: VectorVer, accuracy: Double): Option[(Double, VectorVer)] = {
+    val vectorBetweenPoints = point1.minus(point2)
+    val dot = planeNormal.dotProduct(vectorBetweenPoints)
+    if (abs(dot) > accuracy) {
       // The factor of the point between points
       // If fac is between  (0-1), the points intersects the plane
       //                   < 0.0 : behind the plane
       //                   > 1.0 : In front of plane
-      val fac: Double = - (planeNormal.dotProduct(point1.minus(planePoint)))
-      Some(point1.plus(vectorBetweenPoints.multiplyWithScalar(fac)))
+      val fac: Double = (planeNormal.dotProduct(point1.minus(planePoint))) / dot
+      val res = point1.plus(vectorBetweenPoints.multiplyWithScalar(fac))
+      Some(fac, res)
     } else {
       None
     }
+  } 
+  
+  def distanceFromPlane(point: VectorVer, planePoint: VectorVer, planeNormal: VectorVer) = {
+    (planeNormal.x * point.x) + planeNormal.z * point.z + planeNormal.y * point.y - planeNormal.dotProduct(planePoint)
   }
   
-  def distanceFromAPlane(triangle: Array[VectorVer], kamera: Camera) = {
-      val planePoint = kamera.planePointToVector
-      val planeNormal = kamera.rotationVector.switchSign.normalize 
-      val planeConstantD: Double = - (planePoint.x * planeNormal.x) - (planePoint.z * planeNormal.z) - (planePoint.y * planeNormal.y) 
-      def isInside(vec: VectorVer): Int = {
-        ???
-      }
-      val k = MathHelper.lineInterSectPlane(triangle(1), triangle(0), planePoint, planeNormal, pow(10,-6))
-      val j = MathHelper.lineInterSectPlane(triangle(2), triangle(0), planePoint, planeNormal, pow(10,-6))
-      val o = MathHelper.lineInterSectPlane(triangle(1), triangle(2), planePoint, planeNormal, pow(10,-6))
-  }
+  
+  
 }

@@ -182,7 +182,7 @@ object Writer {
     
     //Making the world
     // Test 1
-//    file.write(magnificentStairs(0.5,0,1))
+    file.write(magnificentStairs(0.5,0,1))
     // Test 2
     file.write(block(-0.5,-0.5, 3))
 //    file.write(block(7.5,-0.5, 10))

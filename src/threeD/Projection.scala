@@ -32,15 +32,18 @@ object Projector {
     val data = Converter.read
     val rotation = Front.kamera.rotation
     val cameraPos = Front.kamera.pos
-    
-    
-    var trianglesBehindCameraFiltered = Buffer[Buffer[VectorVer]]()
-    for (triangle <- data) {
-      Sorter.clip(triangle, kamera)
-      
-      
-    }
-    
+    println(kamera.planePointToVector)
+//    MathHelper.lineInterSectPlane(new VectorVer(Array(Array(0),Array(0),Array(2))), new VectorVer(Array(Array(0),Array(0),Array(-2))), kamera.planePointToVector, kamera.rotationVector.switchSign.normalize, pow(10, -6)) match {
+//      case Some((fac, res)) => {
+//        if (fac > 1.0) {
+//        } else if (true) {
+//          
+//        } else {
+//          
+//        }
+//      }
+//      case None               =>
+//    }
     
     // Selects only those whose normals point to the direction of the camera.
     // Dot product of the line from the camera to the triangle ( any point on triangle ) and normal of the triangle ( both normalized )
