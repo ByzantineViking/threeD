@@ -32,21 +32,31 @@ object Projector {
     val data: Array[Array[VectorVer]] = Converter.read
     val rotation = Front.kamera.rotation
     val cameraPos = Front.kamera.pos
-    var planeCutData =  Buffer[VectorVer]()
+    var planeCutData =  Buffer[Array[VectorVer]]()
+   
     for (triangle <- data) {
-      Sorter.clipping(triangle, kamera)
-    } 
+//      // A call to clipping, it has an useful description.
+      Sorter.clipping(triangle, kamera)._1 match {
+        case Some(array) => planeCutData.append(array)
+        case None        => 
+      }
+      Sorter.clipping(triangle, kamera)._2 match {
+        case Some(array) => planeCutData.append(array)
+        case None        => 
+      }
+    }
+    val noTrianglesBehindCamera = planeCutData.toArray
     
     
       
     
     // Selects only those whose normals point to the direction of the camera.
     // Dot product of the line from the camera to the triangle ( any point on triangle ) and normal of the triangle ( both normalized )
-    var normals = MathHelper.normals(Converter.read)
+    var normals = MathHelper.normals(noTrianglesBehindCamera)
     var partHiding = Buffer[Array[VectorVer]]()
-    for (index <- data.indices) {
-      if ((normals(index).normalize).dotProduct(data(index)(0).minus(kamera.pos).normalize) < 0.0) {
-        partHiding.append(data(index))
+    for (index <- noTrianglesBehindCamera.indices) {
+      if ((normals(index).normalize).dotProduct(noTrianglesBehindCamera(index)(0).minus(kamera.pos).normalize) < 0.0) {
+        partHiding.append(noTrianglesBehindCamera(index))
       }
     }
     val partHidden: Array[Array[VectorVer]] = partHiding.toArray

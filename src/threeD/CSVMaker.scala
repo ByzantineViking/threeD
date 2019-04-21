@@ -13,6 +13,16 @@ object Writer {
    * @param z-coordinate If looking North, up is positive z and down is negative.
    * @param y-coordinate If looking North, forward is positive y and backward is negative.
    */
+  def singleLowTriangle(x: Double, z: Double, y: Double): String = {
+    // Coordinates of bottom-left corner, so the lowest x and lowest z
+    val lowTriangle =   Array(x,z,y,
+                              x+1,z+1,y,
+                              x+1,z,y).mkString(";")
+    lowTriangle
+  }
+  
+  
+  
   def createSouthFacingWall(x: Double, z: Double, y: Double): String = {
     // Coordinates of bottom-left corner, so the lowest x and lowest z
     val lowTriangle =   Array(x,z,y,
@@ -184,11 +194,10 @@ object Writer {
     
     
     // Test 0 
-    file.write(this.createSouthFacingWall(0, -0.5, 2))
-    file.write(this.createNorthFacingWall(0, -0.5, 2))
+//    file.write(this.singleLowTriangle(0, -0.5, 2))
     
     // Test 1
-//    file.write(magnificentStairs(0.5,0,1))
+    file.write(magnificentStairs(0.5,0,1))
     // Test 2
 //    file.write(block(-0.5,-0.5, 3))
 //    file.write(block(7.5,-0.5, 10))
