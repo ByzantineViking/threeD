@@ -181,10 +181,16 @@ object Writer {
     
     
     //Making the world
+    
+    
+    // Test 0 
+    file.write(this.createSouthFacingWall(0, -0.5, 2))
+    file.write(this.createNorthFacingWall(0, -0.5, 2))
+    
     // Test 1
-    file.write(magnificentStairs(0.5,0,1))
+//    file.write(magnificentStairs(0.5,0,1))
     // Test 2
-    file.write(block(-0.5,-0.5, 3))
+//    file.write(block(-0.5,-0.5, 3))
 //    file.write(block(7.5,-0.5, 10))
 //    file.write(block(-9.5,-0.5, 10))
 //    file.write(block(3.5,3.5, 4))

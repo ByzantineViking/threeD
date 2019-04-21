@@ -30,7 +30,7 @@ import scalafx.scene.text._
 //import javafx.animation.AnimationTimer
 import scalafx.animation.AnimationTimer
 
-import scala.math.{sqrt, pow, Pi}
+import scala.math._
 
 
 
@@ -72,7 +72,7 @@ object Front extends JFXApp {
     val robot = new Robot()
         
     // Center of the whole screen, independent of monitor size.
-    val centerPoint: (Double, Double) = (GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint.getX, GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint.getY)
+    val centerPoint: (Int, Int) = (GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint.getX.toInt, GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint.getY.toInt)
     
     
     
@@ -300,20 +300,17 @@ object Front extends JFXApp {
               } else {
                 truePlayerSpeed = playerSpeed
               }
-              
-              
-              
               if (leftPressed) {
-                  kamera.move(truePlayerSpeed * delta, 0, 0)          
+                  kamera.move(truePlayerSpeed * delta * cos(kamera.rotation(1)), 0, -truePlayerSpeed * delta * sin(kamera.rotation(1)))          
               }
               if (rightPressed) {
-                  kamera.move(-truePlayerSpeed * delta, 0, 0) 
+                  kamera.move(-truePlayerSpeed * delta * cos(kamera.rotation(1)), 0, truePlayerSpeed * delta * sin(kamera.rotation(1)))    
               }
               if (downPressed) {
-                   kamera.move(0, 0, - truePlayerSpeed * delta)
+                   kamera.move(-truePlayerSpeed * delta * sin(kamera.rotation(1)), 0, -truePlayerSpeed * delta * cos(kamera.rotation(1)))   
               }
               if (upPressed) {
-                  kamera.move(0, 0,truePlayerSpeed * delta)
+                  kamera.move(truePlayerSpeed * delta * sin(kamera.rotation(1)), 0, truePlayerSpeed * delta * cos(kamera.rotation(1)))  
               }
               
               if (zoomingIn && !zoomingOut) {

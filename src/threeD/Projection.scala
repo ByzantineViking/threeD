@@ -29,21 +29,16 @@ object Projector {
   // Uses the projecting formula mentioned in plan.
   def project(kamera: Camera): Array[Array[(Double,Double)]] = {
     // Required data
-    val data = Converter.read
+    val data: Array[Array[VectorVer]] = Converter.read
     val rotation = Front.kamera.rotation
     val cameraPos = Front.kamera.pos
-    println(kamera.planePointToVector)
-//    MathHelper.lineInterSectPlane(new VectorVer(Array(Array(0),Array(0),Array(2))), new VectorVer(Array(Array(0),Array(0),Array(-2))), kamera.planePointToVector, kamera.rotationVector.switchSign.normalize, pow(10, -6)) match {
-//      case Some((fac, res)) => {
-//        if (fac > 1.0) {
-//        } else if (true) {
-//          
-//        } else {
-//          
-//        }
-//      }
-//      case None               =>
-//    }
+    var planeCutData =  Buffer[VectorVer]()
+    for (triangle <- data) {
+      Sorter.clipping(triangle, kamera)
+    } 
+    
+    
+      
     
     // Selects only those whose normals point to the direction of the camera.
     // Dot product of the line from the camera to the triangle ( any point on triangle ) and normal of the triangle ( both normalized )
