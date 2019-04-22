@@ -42,12 +42,14 @@ object Front extends JFXApp {
 // FEEL FREE TO CHANGE THE FOLLOWING VALUES AS YOU PLEASE.
 //--------------------------------------------------------------------------------//
   
-        var playerSpeed  : Double   = 1
-        val sensitivity  : Double   = 2 * pow(10, -3)
-        var stamina      : Double   = 5
+        var playerSpeed  : Double       = 1
+        val sensitivity  : Double       = 2 * pow(10, -3)
+        val stamina      : Double       = 5
         // Recoveral time in seconds.
-        var recoveralTime: Double = 1.0
-        var doubleJump   : Boolean = true
+        val recoveralTime: Double       = 1.0
+        val doubleJump   : Boolean      = true
+        val endlessStamina: Boolean     = false
+        val flying       : Boolean      = true
 //--------------------------------------------------------------------------------//
         
         // Setting the size of the scene
@@ -61,9 +63,9 @@ object Front extends JFXApp {
         
     // Setting up
     Writer
-    val kamera = new Camera
-    var data = Projector.project(kamera)
     
+    var fullData = Projector.project
+    var data = fullData._1
     
     
     
@@ -185,8 +187,9 @@ object Front extends JFXApp {
               val delta = (time-lastTime)/1e9 // How much time has passed since last going through timer in seconds
               timeFromJump += delta
               // Reacts to changes in rotation and position.
-              data = Projector.project(kamera)
-              kamera.roundRotation
+              fullData =  Projector.project
+              data = fullData._1
+              Camera.roundRotation
               
               // Starts the canvas as a white background.
               gc.fill = Color.White
@@ -194,72 +197,79 @@ object Front extends JFXApp {
               
               
         //-------------------------------------------------------------------------------------------//
-              
               // Stamina
               // Needed for running and jumping
-              if (staminaLeft <= 0) {
-                staminaLeft = 0
-                recovering = true 
-              } else if (staminaLeft >= stamina/2) {
-                replenishing = false
-                recovering   = false
-              }
-              if (recovering) {
-                if (replenishing) {
-                  staminaLeft += 0.01
-                } else {
-                  trueRecoveralTime -= delta
-                  if (trueRecoveralTime <= 0) {
-                    replenishing = true
-                    trueRecoveralTime = recoveralTime
-                  }
+              if (!endlessStamina) {
+                if (staminaLeft <= 0) {
+                  staminaLeft = 0
+                  recovering = true 
+                } else if (staminaLeft >= stamina/2) {
+                  replenishing = false
+                  recovering   = false
                 }
-              } else if (staminaLeft < stamina) {
-                staminaLeft += 0.03
+                if (recovering) {
+                  if (replenishing) {
+                    staminaLeft += 0.01
+                  } else {
+                    trueRecoveralTime -= delta
+                    if (trueRecoveralTime <= 0) {
+                      replenishing = true
+                      trueRecoveralTime = recoveralTime
+                    }
+                  }
+                } else if (staminaLeft < stamina) {
+                  staminaLeft += 0.03
+                }
               }
               
               
               // Jumping
-              if (spacePressed && kamera.z == 0 && !recovering) {
+              if (spacePressed && ((Camera.z == 0 && !recovering) || flying)) {
                  jumping = true
                  jumped = true
                  velocity = 4.12
-                 staminaLeft = 0.0
+                 if (endlessStamina || flying) {
+                   // No effect to stamina
+                 } else {
+                   staminaLeft = 0.0
+                 }
                  timeFromJump = 0.0
               }
-              if (spacePressed && doubleJump && kamera.z >= 0.4 && timeFromJump >= 0.4 && jumped && !jumpedTwice) {
+              // Double jump. Not possible while flying mode enabled.
+              if (spacePressed && doubleJump && Camera.z >= 0.4 && timeFromJump >= 0.4 && jumped && !jumpedTwice && !flying) {
                  jumping = true
                  jumpedTwice = true
                  velocity = 4.12
-                 staminaLeft = 0.0
+                 if (!endlessStamina) {
+                   staminaLeft = 0.0
+                 }
               }
               if (velocity == 0.0) {
                 jumped = false
                 jumpedTwice = false
               }
               
-              if (kamera.z < 0 && jumping) {
+              if (Camera.z < 0 && jumping) {
                   jumping = false
                   velocity = 0.0
-                  kamera.move(0,-kamera.z,0)
+                  Camera.move(0,-Camera.z,0)
                 }
               if (jumping) {
-                kamera.move(0, velocity * delta, 0)
+                Camera.move(0, velocity * delta, 0)
                 velocity -= 9.81 * delta
               }
-              
               // Sprinting
-              if (shiftPressed && kamera.z == 0 && !recovering) {
+              if (shiftPressed && Camera.z == 0 && (!recovering || endlessStamina)) {
                 sprinting = true
               } else {
                 sprinting = false
               }
-              if (sprinting) {
+              if (sprinting && !endlessStamina) {
                 staminaLeft -= 0.04
               }
               
               // Crouching
-              if (controlPressed && (kamera.z <= 0)) {
+              if (controlPressed && (Camera.z <= 0)) {
                  crouching = true
                  gettingUp = false
               } else {
@@ -267,16 +277,16 @@ object Front extends JFXApp {
               }
               
               if (crouching) {
-                if (kamera.z > -0.25) {
-                  kamera.move(0, -0.8 * delta, 0)
-                } else if (kamera.z < -0.25) {
-                  kamera.moveTo(kamera.x, -0.25, kamera.y)
+                if (Camera.z > -0.25) {
+                  Camera.move(0, -0.8 * delta, 0)
+                } else if (Camera.z < -0.25) {
+                  Camera.moveTo(Camera.x, -0.25, Camera.y)
                 }
               } else if (gettingUp) {
-                if (kamera.z < 0) {
-                  kamera.move(0, 1.2 * delta, 0)
-                } else if (kamera.z > 0) {
-                  kamera.moveTo(kamera.x, 0.0, kamera.y)
+                if (Camera.z < 0) {
+                  Camera.move(0, 1.2 * delta, 0)
+                } else if (Camera.z > 0) {
+                  Camera.moveTo(Camera.x, 0.0, Camera.y)
                   gettingUp = false
                 } else {
                   gettingUp = false
@@ -287,7 +297,9 @@ object Front extends JFXApp {
          //-------------------------------------------------------------------------------------------//     
               
               // Determining the speed of player
-              if (crouching) {
+              if (flying && jumping) {
+                truePlayerSpeed = playerSpeed * 1.6
+              } else if (crouching) {
                 truePlayerSpeed = playerSpeed / 2.5
               } else if (gettingUp) {
                 truePlayerSpeed = playerSpeed / 3.0
@@ -300,23 +312,25 @@ object Front extends JFXApp {
               } else {
                 truePlayerSpeed = playerSpeed
               }
+              
+              // If setting velocity to 0, the jumping ends
               if (leftPressed) {
-                  kamera.move(truePlayerSpeed * delta * cos(kamera.rotation(1)), 0, -truePlayerSpeed * delta * sin(kamera.rotation(1)))          
+                  Camera.move(truePlayerSpeed * delta * cos(Camera.rotation(1)), 0, -truePlayerSpeed * delta * sin(Camera.rotation(1)))          
               }
               if (rightPressed) {
-                  kamera.move(-truePlayerSpeed * delta * cos(kamera.rotation(1)), 0, truePlayerSpeed * delta * sin(kamera.rotation(1)))    
+                  Camera.move(-truePlayerSpeed * delta * cos(Camera.rotation(1)), 0, truePlayerSpeed * delta * sin(Camera.rotation(1)))    
               }
               if (downPressed) {
-                   kamera.move(-truePlayerSpeed * delta * sin(kamera.rotation(1)), 0, -truePlayerSpeed * delta * cos(kamera.rotation(1)))   
+                   Camera.move(-truePlayerSpeed * delta * sin(Camera.rotation(1)), 0, -truePlayerSpeed * delta * cos(Camera.rotation(1)))   
               }
               if (upPressed) {
-                  kamera.move(truePlayerSpeed * delta * sin(kamera.rotation(1)), 0, truePlayerSpeed * delta * cos(kamera.rotation(1)))  
+                  Camera.move(truePlayerSpeed * delta * sin(Camera.rotation(1)), 0, truePlayerSpeed * delta * cos(Camera.rotation(1)))  
               }
               
               if (zoomingIn && !zoomingOut) {
-                kamera.zoomIn
+                Camera.zoomIn
               } else if (!zoomingIn && zoomingOut) {
-                kamera.zoomOut
+                Camera.zoomOut
               }
               
               
@@ -369,7 +383,7 @@ object Front extends JFXApp {
             case KeyCode.Shift   =>  shiftPressed     = true
             case KeyCode.Plus    =>  zoomingIn        = true
             case KeyCode.Minus   =>  zoomingOut       = true
-            case KeyCode.Z       =>  kamera.defaultZoom
+            case KeyCode.Z       =>  Camera.defaultZoom
             case KeyCode.Escape  =>  System.exit(1)
             case _ =>
           }
@@ -390,7 +404,9 @@ object Front extends JFXApp {
             // Similarly releasing shift starts recoveral.
             case KeyCode.Shift   =>{
                                      shiftPressed       = false
-                                     recovering         = true
+                                     if (!endlessStamina) {
+                                       recovering         = true
+                                     }
                                      sprinting          = false
             }
             case KeyCode.Plus    =>  zoomingIn        = false
@@ -402,13 +418,13 @@ object Front extends JFXApp {
         onMouseMoved = (event: MouseEvent) => {
             mouseDeltaX = event.screenX - centerPoint._1
             mouseDeltaY = event.screenY - centerPoint._2
-            kamera.rotate(mouseDeltaY * sensitivity / (2*Pi), -mouseDeltaX * sensitivity  / (2*Pi) , 0)
+            Camera.rotate(mouseDeltaY * sensitivity / (2*Pi), -mouseDeltaX * sensitivity  / (2*Pi) , 0)
             robot.mouseMove(centerPoint._1.toInt, centerPoint._2.toInt)
         }
         onMouseDragged = (event: MouseEvent) => {
             mouseDeltaX = event.screenX - centerPoint._1
             mouseDeltaY = event.screenY - centerPoint._2
-            kamera.rotate(mouseDeltaY * sensitivity / (2*Pi), -mouseDeltaX * sensitivity  / (2*Pi) , 0)
+            Camera.rotate(mouseDeltaY * sensitivity / (2*Pi), -mouseDeltaX * sensitivity  / (2*Pi) , 0)
             robot.mouseMove(centerPoint._1.toInt, centerPoint._2.toInt)
         }
 

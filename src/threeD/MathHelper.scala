@@ -28,7 +28,8 @@ object MathHelper {
   /**
    * The plane normal must be normalized
    * 
-   * 
+   * The factorial part doesn't work.. Might be differences how the 3d space is constructed. The intersection point still remains accurate.
+   * I've tried another way and it did not produce an accurate point, so this will do in the limitations of the axioms of the 3d world.
    */
   def lineInterSectPlane(point1: VectorVer, point2: VectorVer, planePoint: VectorVer, planeNormal: VectorVer, accuracy: Double): Option[VectorVer] = {
     val truePlaneNormal = planeNormal.normalize
@@ -72,5 +73,20 @@ object MathHelper {
     }
   }
   
+  def intersectPointBetweenPoints(p0: VectorVer, p1: VectorVer, planePoint: VectorVer, rot : VectorVer): Option[VectorVer] = {
+    MathHelper.lineInterSectPlane(p0, p1, planePoint, rot , pow(10, -8)) match {
+      case Some(intersectPoint) => {
+        val crossProd = (p1.minus(p0)).crossProduct(intersectPoint.minus(p0))
+        val cmp: Double = p1.minus(p0).dotProduct(intersectPoint.minus(p0))
+        if (crossProd.abs.equal(VectorVer.createZeroVector) && cmp > 0.0 && cmp < sqrt(p1.minus(p0).length)) {
+          Some(intersectPoint)
+        } else {
+          None
+        }
+      }
+      case None            => None
+      
+    }
+  }
   
 }

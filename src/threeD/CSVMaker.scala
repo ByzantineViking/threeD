@@ -4,6 +4,17 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.io.{BufferedWriter, FileWriter}
 import scala.collection.JavaConversions._
+
+
+
+
+/** Used to create the world. Always overwrites the chosen file, so if you want to save your creation,
+ *  remember to change the "fileName" in ScalaFXApp after creating the world, such that the next time you
+ *  launch it will write to different file.
+ *  
+ *  Creating the world happens at the bottom of this page.
+ *  Happy building.
+ */
 object Writer {
   // All the triangles MUST be created in clock-wise order.
   // Starting points are from looking at it from the mentioned direction, the bottom-left corner, where the bottom and top triangle meet.
@@ -189,21 +200,30 @@ object Writer {
     val filePath = currentDir + "/src/resources/data.csv"
     val file = new FileWriter(filePath)
     
+//----------------------------------------------------------------------------------------------//
+    //---------------------------//
+    //----- MAKING THE WORLD-----//
+    //---------------------------//
     
-    //Making the world
     
+    // Here you can use any of the above methods or combine/ create new ones.
+    // 
+    // hint : check which coordinate is given in the documentation of the method.
     
-    // Test 0 
-//    file.write(this.singleLowTriangle(0, -0.5, 2))
-    
-    // Test 1
-    file.write(magnificentStairs(0.5,0,1))
-    // Test 2
+    // For testing purposes
+    file.write(this.singleLowTriangle(0, -0.5, 2))
+    // For testing purposes
 //    file.write(block(-0.5,-0.5, 3))
 //    file.write(block(7.5,-0.5, 10))
 //    file.write(block(-9.5,-0.5, 10))
 //    file.write(block(3.5,3.5, 4))
 //    file.write(openBox(2.5,-0.5,2.0))
+    
+    
+    
+    // A grand staircase.
+//    file.write(magnificentStairs(0.5,0,1))
+    
     file.close()
     
 }

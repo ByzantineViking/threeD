@@ -42,6 +42,18 @@ class VectorVer(val vector: Array[Array[Double]]) {
      new VectorVer(Array(Array(-this.x), Array(-this.z), Array(-this.y)))
    }
    
+   def abs: VectorVer = {
+     new VectorVer(Array(Array(this.x.abs), Array(this.z.abs), Array(this.y.abs)))
+   }
+   
+   def equal(another: VectorVer) = {
+     if (this.x == another.x && this.z == another.z && this.y == another.y) {
+       true
+     } else {
+       false
+     }
+   }
+   
    // Used to calculate normals for visibility calculations.
    def crossProduct(another: VectorVer): VectorVer = {
      new VectorVer(Array(Array(this.z * another.y - this.y * another.z),Array( this.y * another.x - this.x * another.y) , Array(this.x * another.z - this.z * another.x)))
@@ -56,4 +68,13 @@ class VectorVer(val vector: Array[Array[Double]]) {
    override def toString()= {
      "\n" + this.x.toString() + " , " + this.z.toString() + " , " + this.y.toString() + "\n"
    }
+}
+
+object VectorVer {
+  def createZeroVector: VectorVer = {
+    new VectorVer(Array(Array(0.0), Array(0.0), Array(0.0)))
+  }
+  def apply(x: Double, z: Double, y: Double) = {
+    new VectorVer(Array(Array(x), Array(z), Array(y)))
+  }
 }

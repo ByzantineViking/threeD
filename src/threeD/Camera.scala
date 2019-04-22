@@ -2,7 +2,7 @@ package threeD
 import scala.collection.mutable.Buffer
 import scala.math._
 
-class Camera {
+object Camera {
   var rotation = Buffer[Double](0,0,0)
   def horizontal = rotation(1)
   def vertical   = rotation(0)
@@ -54,7 +54,23 @@ class Camera {
   def y: Double = pos.validVector(2)(0)
   
   def move(xMovement: Double,zMovement: Double,yMovement: Double): Unit = {
-    pos = new VectorVer(Array(Array(pos.x + xMovement),Array(pos.z + zMovement), Array(pos.y + yMovement)))
+    val oldPos = pos
+    val possibleNewPos = new VectorVer(Array(Array(pos.x + xMovement),Array(pos.z + zMovement), Array(pos.y + yMovement)))
+    for (triangle <- Front.fullData._2) {
+        MathHelper.lineInterSectPlane(oldPos, possibleNewPos, triangle(0), MathHelper.normal(triangle).normalize, pow(10, -4)) match {
+          case Some(intersection) => {
+            val a = MathHelper.distanceFromPlane(intersection, triangle(0), MathHelper.normal(triangle).normalize)
+            val b = MathHelper.distanceFromPlane(oldPos, triangle(0), MathHelper.normal(triangle).normalize)
+            val c = MathHelper.distanceFromPlane(possibleNewPos, triangle(0), MathHelper.normal(triangle).normalize)
+            if (a >= c && a <= b) {
+              pos = oldPos
+            } else {
+              pos = possibleNewPos
+            }
+          }
+          case None               => pos = possibleNewPos
+        }
+    }
   }
   def moveTo(xPos: Double, zPos: Double, yPos: Double): Unit = {
     pos = new VectorVer(Array(Array(xPos),Array(zPos), Array(yPos)))

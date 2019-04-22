@@ -11,25 +11,28 @@ object Sorter {
    * IF a triangle has 2 points in front of kamera, this rectangle of the 2 points and two intersection points will be cut into two triangles.
    * 
    */
-  def clipping(triangle : Array[VectorVer], kamera: Camera): (Option[Array[VectorVer]],Option[Array[VectorVer]]) = {
+  def clipping(triangle : Array[VectorVer], planePoint: VectorVer, rot: VectorVer): (Option[Array[VectorVer]],Option[Array[VectorVer]]) = {
         var insidePoints = Buffer[VectorVer]()
         var outsidePoints = Buffer[VectorVer]()
         var intersectionPoints = Buffer[VectorVer]()
          
-        val planePoint: VectorVer = kamera.pos.plus(new VectorVer(Array(Array(0), Array(0), Array(0.0))))
-        val rot: VectorVer = kamera.rotationVector
-        helpClip(triangle(0), triangle(1), planePoint, rot) match {
+        MathHelper.intersectPointBetweenPoints(triangle(0), triangle(1), planePoint, rot) match {
           case Some(intersect) => {
+//            println("Distance from plane: " + MathHelper.distanceFromPlane(triangle(0), planePoint, rot))
             intersectionPoints.append(intersect)
             if (MathHelper.distanceFromPlane(triangle(0), planePoint, rot) > 0 && MathHelper.distanceFromPlane(triangle(1), planePoint, rot) < 0) {
               insidePoints.append(triangle(0))
+//              println("Point 0 : " + triangle(0))
             } else if (MathHelper.distanceFromPlane(triangle(0), planePoint, rot) < 0 && MathHelper.distanceFromPlane(triangle(1), planePoint, rot) > 0){
               insidePoints.append(triangle(1))
+//              println("Point 1 : " + triangle(1))
             } else {
               println("cannot be")
             }
           }
           case None            => {
+//            println("Point 0 : " + triangle(0))
+//            println("Distance from plane: " + MathHelper.distanceFromPlane(triangle(0), planePoint, rot))
             if (MathHelper.distanceFromPlane(triangle(0), planePoint, rot) > 0) {
               insidePoints.append(triangle(0))
             }
@@ -38,7 +41,7 @@ object Sorter {
             }
           }
         }
-        helpClip(triangle(1), triangle(2), planePoint, rot) match {
+        MathHelper.intersectPointBetweenPoints(triangle(1), triangle(2), planePoint, rot) match {
           case Some(intersect) => {
             intersectionPoints.append(intersect)
             if (MathHelper.distanceFromPlane(triangle(1), planePoint, rot) > 0 && MathHelper.distanceFromPlane(triangle(2), planePoint, rot) < 0) {
@@ -58,7 +61,7 @@ object Sorter {
             }
           }
         }
-        helpClip(triangle(2), triangle(0), planePoint, rot) match {
+        MathHelper.intersectPointBetweenPoints(triangle(2), triangle(0), planePoint, rot) match {
           case Some(intersect) => {
             intersectionPoints.append(intersect)
             if (MathHelper.distanceFromPlane(triangle(2), planePoint, rot) > 0 && MathHelper.distanceFromPlane(triangle(0), planePoint, rot) < 0) {
@@ -79,9 +82,10 @@ object Sorter {
           }  
         }
         insidePoints = insidePoints.distinct
+//        println(insidePoints)
+//        println("Kamera Pos: " + planePoint)
+//        println(intersectionPoints)
         
-        println("Inside : " + insidePoints.length)
-        println("Intersect : " + intersectionPoints.length)
         if (insidePoints.length == 2 && intersectionPoints.length == 2) {
           (Some(Array(insidePoints(0), insidePoints(1), intersectionPoints(0))), Some(Array(insidePoints(1),  intersectionPoints(1), intersectionPoints(0))))
         } else if (insidePoints.length == 1 && intersectionPoints.length == 2) {
@@ -97,20 +101,7 @@ object Sorter {
         
   }
   
-  def helpClip(p0: VectorVer, p1: VectorVer, planePoint: VectorVer, rot : VectorVer): Option[VectorVer] = {
-    MathHelper.lineInterSectPlane(p0, p1, planePoint, rot , pow(10, -6)) match {
-      case Some(intersectPoint) => {
-        val cmp: Double = p1.minus(p0).dotProduct(intersectPoint.minus(p0))
-        if (cmp > 0.0 && cmp < sqrt(p1.minus(p0).length)) {
-          Some(intersectPoint)
-        } else {
-          None
-        }
-      }
-      case None            => None
-      
-    }
-  }
+  
   
 
   
@@ -120,31 +111,31 @@ object Sorter {
    */
   def sort(array: Array[Array[VectorVer]]): Array[Array[VectorVer]] = {
                                          array.sortWith((x, y) => {(
-                                         sqrt(pow((x(0).validVector(0)(0) - Front.kamera.pos.validVector(0)(0)), 2))
-                                       + sqrt(pow((x(0).validVector(1)(0) - Front.kamera.pos.validVector(1)(0)), 2))
-                                       + sqrt(pow((x(0).validVector(2)(0) - Front.kamera.pos.validVector(2)(0)), 2))
+                                         sqrt(pow((x(0).validVector(0)(0) - Camera.pos.validVector(0)(0)), 2))
+                                       + sqrt(pow((x(0).validVector(1)(0) - Camera.pos.validVector(1)(0)), 2))
+                                       + sqrt(pow((x(0).validVector(2)(0) - Camera.pos.validVector(2)(0)), 2))
                                        
-                                       + sqrt(pow((x(1).validVector(0)(0) - Front.kamera.pos.validVector(0)(0)), 2))
-                                       + sqrt(pow((x(1).validVector(1)(0) - Front.kamera.pos.validVector(1)(0)), 2))
-                                       + sqrt(pow((x(1).validVector(2)(0) - Front.kamera.pos.validVector(2)(0)), 2))
+                                       + sqrt(pow((x(1).validVector(0)(0) - Camera.pos.validVector(0)(0)), 2))
+                                       + sqrt(pow((x(1).validVector(1)(0) - Camera.pos.validVector(1)(0)), 2))
+                                       + sqrt(pow((x(1).validVector(2)(0) - Camera.pos.validVector(2)(0)), 2))
                                        
-                                       + sqrt(pow((x(2).validVector(0)(0) - Front.kamera.pos.validVector(0)(0)), 2))
-                                       + sqrt(pow((x(2).validVector(1)(0) - Front.kamera.pos.validVector(1)(0)), 2))
-                                       + sqrt(pow((x(2).validVector(2)(0) - Front.kamera.pos.validVector(2)(0)), 2))
+                                       + sqrt(pow((x(2).validVector(0)(0) - Camera.pos.validVector(0)(0)), 2))
+                                       + sqrt(pow((x(2).validVector(1)(0) - Camera.pos.validVector(1)(0)), 2))
+                                       + sqrt(pow((x(2).validVector(2)(0) - Camera.pos.validVector(2)(0)), 2))
                                        
                                        >
                                          
-                                         sqrt(pow((y(0).validVector(0)(0) - Front.kamera.pos.validVector(0)(0)), 2))
-                                       + sqrt(pow((y(0).validVector(1)(0) - Front.kamera.pos.validVector(1)(0)), 2))
-                                       + sqrt(pow((y(0).validVector(2)(0) - Front.kamera.pos.validVector(2)(0)), 2))
+                                         sqrt(pow((y(0).validVector(0)(0) - Camera.pos.validVector(0)(0)), 2))
+                                       + sqrt(pow((y(0).validVector(1)(0) - Camera.pos.validVector(1)(0)), 2))
+                                       + sqrt(pow((y(0).validVector(2)(0) - Camera.pos.validVector(2)(0)), 2))
                                        
-                                       + sqrt(pow((y(1).validVector(0)(0) - Front.kamera.pos.validVector(0)(0)), 2))
-                                       + sqrt(pow((y(1).validVector(1)(0) - Front.kamera.pos.validVector(1)(0)), 2))
-                                       + sqrt(pow((y(1).validVector(2)(0) - Front.kamera.pos.validVector(2)(0)), 2))
+                                       + sqrt(pow((y(1).validVector(0)(0) - Camera.pos.validVector(0)(0)), 2))
+                                       + sqrt(pow((y(1).validVector(1)(0) - Camera.pos.validVector(1)(0)), 2))
+                                       + sqrt(pow((y(1).validVector(2)(0) - Camera.pos.validVector(2)(0)), 2))
                                        
-                                       + sqrt(pow((y(2).validVector(0)(0) - Front.kamera.pos.validVector(0)(0)), 2))
-                                       + sqrt(pow((y(2).validVector(1)(0) - Front.kamera.pos.validVector(1)(0)), 2))
-                                       + sqrt(pow((y(2).validVector(2)(0) - Front.kamera.pos.validVector(2)(0)), 2))
+                                       + sqrt(pow((y(2).validVector(0)(0) - Camera.pos.validVector(0)(0)), 2))
+                                       + sqrt(pow((y(2).validVector(1)(0) - Camera.pos.validVector(1)(0)), 2))
+                                       + sqrt(pow((y(2).validVector(2)(0) - Camera.pos.validVector(2)(0)), 2))
     )}
   )}
   

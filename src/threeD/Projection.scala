@@ -27,20 +27,22 @@ object Converter {
 // Applies the 2D-planar projection, using 3D projection.
 object Projector {
   // Uses the projecting formula mentioned in plan.
-  def project(kamera: Camera): Array[Array[(Double,Double)]] = {
+  def project: (Array[Array[(Double,Double)]], Array[Array[VectorVer]]) = {
     // Required data
     val data: Array[Array[VectorVer]] = Converter.read
-    val rotation = Front.kamera.rotation
-    val cameraPos = Front.kamera.pos
+    val rotation = Camera.rotation
+    val cameraPos = Camera.pos
     var planeCutData =  Buffer[Array[VectorVer]]()
    
     for (triangle <- data) {
 //      // A call to clipping, it has an useful description.
-      Sorter.clipping(triangle, kamera)._1 match {
+      val planePointBack: VectorVer = Camera.pos.plus(new VectorVer(Array(Array(0), Array(0), Array(0))))
+      val rotStraigth: VectorVer = Camera.rotationVector
+      Sorter.clipping(triangle, planePointBack, rotStraigth)._1 match {
         case Some(array) => planeCutData.append(array)
         case None        => 
       }
-      Sorter.clipping(triangle, kamera)._2 match {
+      Sorter.clipping(triangle, planePointBack, rotStraigth)._2 match {
         case Some(array) => planeCutData.append(array)
         case None        => 
       }
@@ -55,11 +57,11 @@ object Projector {
     var normals = MathHelper.normals(noTrianglesBehindCamera)
     var partHiding = Buffer[Array[VectorVer]]()
     for (index <- noTrianglesBehindCamera.indices) {
-      if ((normals(index).normalize).dotProduct(noTrianglesBehindCamera(index)(0).minus(kamera.pos).normalize) < 0.0) {
+      if ((normals(index).normalize).dotProduct(noTrianglesBehindCamera(index)(0).minus(Camera.pos).normalize) < 0.0) {
         partHiding.append(noTrianglesBehindCamera(index))
       }
     }
-    val partHidden: Array[Array[VectorVer]] = partHiding.toArray
+    val final3DCoordinates: Array[Array[VectorVer]] = partHiding.toArray
      
     // Forming a matrix dependent of the current camera rotation.
     def transformationMatrix1 = new Matrix(Array(Array(1,0,0),Array(0, cos(rotation(0)), sin(rotation(0))),Array(0,-sin(rotation(0)),cos(rotation(0)))))
@@ -69,7 +71,7 @@ object Projector {
     
     // Handling the position and taking the above rotation into account.
     var newData = Buffer[Array[VectorVer]]()
-    for (shape <- partHidden) {
+    for (shape <- final3DCoordinates) {
       var shapes = Buffer[VectorVer]()
       for  (point <- shape) {
         shapes.append(transform.multiplyWithVector(point.minus(cameraPos)))
@@ -80,21 +82,21 @@ object Projector {
     
     // The drawing distance. If the last value is negative, everything is inverted horizontally (across a vertical line),
     // and if the last value is positive, everything is inverted vertically (across a horizontal line).
-    val e = kamera.planePoint
+    val e = Camera.planePoint
     
     // Rest of the math in the formula. Does the 2D planar projection.
     val finalProjection = Buffer[Array[(Double,Double)]]()
     for (shape <- dataInVectorVer) {
       var shapeReformated = Buffer[(Double,Double)]()
       for ( point <- shape) {
-        val x: Double = e(2)/point.y* point.x + e(0)
-        val y: Double = e(2)/point.y * point.z + e(1)
+        val x: Double = (e(2)/point.y)* point.x + e(0)
+        val y: Double = (e(2)/point.y) * point.z + e(1)
         val projected: (Double, Double) = (x,y)
         shapeReformated.append(projected)
       }
       finalProjection.append(shapeReformated.toArray)
     }
-    finalProjection.toArray
+    (finalProjection.toArray, final3DCoordinates)
   } // End of project-method.
   
   
