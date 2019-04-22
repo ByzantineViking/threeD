@@ -69,7 +69,7 @@ class VectorVer(val vector: Array[Array[Double]]) {
      "\n" + this.x.toString() + " , " + this.z.toString() + " , " + this.y.toString() + "\n"
    }
 }
-
+// Factory methods
 object VectorVer {
   def createZeroVector: VectorVer = {
     new VectorVer(Array(Array(0.0), Array(0.0), Array(0.0)))

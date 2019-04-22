@@ -157,11 +157,25 @@ object Writer {
     createSouthFacingWall(x-1,z,y+1) + createEastFacingWall(x-1,z,y) + createWestFacingWall(x,z,y+1) + createGroundFacingWall(x-1,z+1,y+1) + createSkyFacingWall(x-1,z,y) 
   }
   
-  def hallwayNorth(x: Double, z: Double, y: Double): String = {
+  def hallwayNorth(x: Double, z: Double, y: Double, length: Int): String = {
+    var ret : String = ""
     //So if I'm standing in the middle of crossroads and looking at y,
     //I look slightly to the left to see a corner (closest corner of the block)
     //Coordinates are the bottom coordinates of that corner (where it hits the ground)
-    block(x, z, y) + block(x + 2, z, y) //+ block(x, z, y - 1) + block(x + 2, z, y -1)
+    for (i <- 0 until length) {
+      ret = ret + block(x, z, y+i) + block(x + 2, z, y+i)
+    }
+    ret
+  }
+  def wideHallwayNorth(x: Double, z: Double, y: Double, length: Int): String = {
+    var ret : String = ""
+    //So if I'm standing in the middle of crossroads and looking at y,
+    //I look slightly to the left to see a corner (closest corner of the block)
+    //Coordinates are the bottom coordinates of that corner (where it hits the ground)
+    for (i <- 0 until length) {
+      ret = ret + block(x, z, y+i) + block(x + 3, z, y+i)
+    }
+    ret
   }
   
   def magnificentStairs(x: Double, z: Double, y: Double): String = {
@@ -183,7 +197,6 @@ object Writer {
     slope(x-4.5,z-0.5,y) +
     slope(x+0.5,z+0.5,y+1) +
     slope(x+1.5,z+0.5,y+1) +
-    slope(x-3.5,z+0.5,y+1) +
     slope(x-0.5,z+0.5,y+1) +
     slope(x-1.5,z+0.5,y+1) +
     slope(x-2.5,z+0.5,y+1) +
@@ -211,7 +224,7 @@ object Writer {
     // hint : check which coordinate is given in the documentation of the method.
     
     // For testing purposes
-    file.write(this.singleLowTriangle(0, -0.5, 2))
+//    file.write(this.singleLowTriangle(0, -0.5, 2))
     // For testing purposes
 //    file.write(block(-0.5,-0.5, 3))
 //    file.write(block(7.5,-0.5, 10))
@@ -222,7 +235,9 @@ object Writer {
     
     
     // A grand staircase.
-//    file.write(magnificentStairs(0.5,0,1))
+    file.write(magnificentStairs(0.5,0,1))
+    file.write(wideHallwayNorth(-1, 3.5, 5, 10))
+    
     
     file.close()
     

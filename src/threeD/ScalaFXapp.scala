@@ -35,12 +35,22 @@ import scala.math._
 
 
       
-    
+/**
+ * The application window. Everything regarding ScalaFX, and various game mechanics.  
+ */
 object Front extends JFXApp {
   
   
-// FEEL FREE TO CHANGE THE FOLLOWING VALUES AS YOU PLEASE.
+/**
+ *  SETTINGS
+ * 
+ *  FEEL FREE TO CHANGE THE FOLLOWING VALUES AS YOU PLEASE.
+ *  
+ *  ALSO CREATE OWN WORLDS IN "CSVMaker"!
+ */
 //--------------------------------------------------------------------------------//
+  
+       
   
         var playerSpeed  : Double       = 1
         val sensitivity  : Double       = 2 * pow(10, -3)
@@ -50,53 +60,70 @@ object Front extends JFXApp {
         val doubleJump   : Boolean      = true
         val endlessStamina: Boolean     = false
         val flying       : Boolean      = true
+        
 //--------------------------------------------------------------------------------//
         
+         // Clips the triangle behind camera, but decreases performance
+        val clippingEnabled             = false
+        
+//--------------------------------------------------------------------------------//
+  
         // Setting the size of the scene
         val base = 250
         val widthAspect = 4
         val heightAspect = 3
         
 //--------------------------------------------------------------------------------//
+        // For loading a CSV file
         val fileName = "data.csv"
+        
+        // For loading a object file
+        val objectName = "temple3.obj"
+        
+        // If false, read object, if true, read CSV
+        val fileIsCSV = false
 //--------------------------------------------------------------------------------//
+// END OF SETTINGS. 
+        
         
     // Setting up
     Writer
     
     var fullData = Projector.project
     var data = fullData._1
+    var distances: Array[Double] = fullData._2.map(triangle => MathHelper.triangleDistanceFromCameraPoint(triangle))
     
     
     
     // ScalaFx specific requirements
     val root = new Group()
-    val robot = new Robot()
         
+        
+        
+    // Robot moves the mouse back to the center of the screen. If the processor processes all the frames, the mouse stays within the window.
+    val robot = new Robot()
     // Center of the whole screen, independent of monitor size.
     val centerPoint: (Int, Int) = (GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint.getX.toInt, GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint.getY.toInt)
     
     
-    
-    
-    private var mousePosX: Double = .0
-    private var mousePosY: Double = .0
-    private var mouseOldX: Double = .0
-    private var mouseOldY: Double = .0
+    // Take the amount the mouse has moved each frame.
     private var mouseDeltaX: Double = .0
     private var mouseDeltaY: Double = .0
     
-    
+    // Enable multiple keys to be pressed at once.
     private var upPressed: Boolean = false
     private var downPressed: Boolean = false
     private var rightPressed: Boolean = false
     private var leftPressed: Boolean = false
+    private var leanRight: Boolean = false
+    private var leanLeft: Boolean = false
     private var spacePressed: Boolean = false
     private var controlPressed: Boolean = false
     private var shiftPressed: Boolean = false
     private var zoomingIn: Boolean = false
     private var zoomingOut: Boolean = false
-    var userInput = true
+    
+//-------------------------------------------------------------------------------------------//
     
     stage = new JFXApp.PrimaryStage {
          
@@ -108,50 +135,13 @@ object Front extends JFXApp {
       scene = new Scene(root, widthAspect * base, heightAspect * base, depthBuffer = true, antiAliasing = SceneAntialiasing.Balanced) {
             cursor = Cursor.NONE
             
-            
-            
-            // Helper function to rebase the coordinate system to the screen.
-            def convertToCanvas(x : (Double, Double)): (Int, Int) = {
-                  ((((x._1 + 1.0)/2.0) * widthAspect * base).toInt, ((x._2 + 1)/2 * heightAspect * base).toInt)
-              }
-        
-            
-            def drawTriangles(A: (Double,Double), B: (Double,Double), C:(Double,Double)) = {
-              
-              val a = convertToCanvas(A)
-              val b = convertToCanvas(B)
-              val c = convertToCanvas(C)
-              
-              val path = new Path
-              path.elements += MoveTo(a._1, a._2)
-              path.elements += LineTo(b._1,b._2)
-              path.elements += LineTo(c._1,c._2)
-              path.elements += new ClosePath
-              path.fill = Color.Yellow
-//              path.stroke = Color.Yellow
-              path
-            }
-        
-//        def drawWall(A: (Double,Double), B: (Double,Double), C:(Double,Double), D: (Double, Double)) = {
-//              def convertToCanvas(x : (Double, Double)): (Int, Int) = {
-//                  ((((x._1 + 1.0)/2.0) * widthAspect * base).toInt, ((x._2 + 1)/2 * heightAspect * base).toInt)
-//              }
-//              val a = convertToCanvas(A)
-//              val b = convertToCanvas(B)
-//              val c = convertToCanvas(C)
-//              val d = convertToCanvas(D)
-//              
-//              
-//              
-//              
-//            }
-            
-   
         //Drawing happens on the canvas, as it is quicker when dealing with having to re-draw everything every frame.
         val canvas = new Canvas(widthAspect * base, heightAspect * base)
         val gc = canvas.graphicsContext2D
-        //Here starts the bread and butter of the animation, AnimationTimer.
-        var lastTime = 0L
+
+//-----------------------------------------------------------------------------------------------------------------------------------------//
+        
+        // Flags, counters, and keepers of game mechanics.
         
         //Related to jumping
         var velocity = 0.0
@@ -179,7 +169,12 @@ object Front extends JFXApp {
         var gettingUp = false
 
         
-//-------------------------------------------------------------------------------------------//
+        var leaningUp = false
+         
+//-----------------------------------------------------------------------------------------------------------------------------------------//
+        
+        // Here starts the bread and butter of the animation, AnimationTimer.
+        var lastTime = 0L
         // Timer is the loop inside of which the whole application runs.
         val timer: AnimationTimer = AnimationTimer(time => {
           if(lastTime>0) {
@@ -189,14 +184,18 @@ object Front extends JFXApp {
               // Reacts to changes in rotation and position.
               fullData =  Projector.project
               data = fullData._1
+              distances = fullData._2.map(triangle => MathHelper.triangleDistanceFromCameraPoint(triangle))
+              
               Camera.roundRotation
               
               // Starts the canvas as a white background.
               gc.fill = Color.White
               gc.fillRect(0,0,widthAspect * base,heightAspect * base)
               
-              
         //-------------------------------------------------------------------------------------------//
+              
+              // Game mechanics.
+              
               // Stamina
               // Needed for running and jumping
               if (!endlessStamina) {
@@ -268,6 +267,24 @@ object Front extends JFXApp {
                 staminaLeft -= 0.04
               }
               
+              
+              if (leaningUp) {
+                if (Camera.leaning > 0.0) {
+                  Camera.rotate(0, 0, -20 * sensitivity  / (2*Pi))
+                  closeEnough
+                } else if (Camera.leaning < 0.0) {
+                  Camera.rotate(0, 0, 20 * sensitivity  / (2*Pi))
+                  closeEnough
+                } else {
+                  leaningUp = false
+                }
+              }
+              def closeEnough: Unit = {
+                if (Camera.leaning.abs < 0.01) {
+                  Camera.resetLeaning
+                }
+              }
+              
               // Crouching
               if (controlPressed && (Camera.z <= 0)) {
                  crouching = true
@@ -282,6 +299,7 @@ object Front extends JFXApp {
                 } else if (Camera.z < -0.25) {
                   Camera.moveTo(Camera.x, -0.25, Camera.y)
                 }
+                lean
               } else if (gettingUp) {
                 if (Camera.z < 0) {
                   Camera.move(0, 1.2 * delta, 0)
@@ -291,6 +309,13 @@ object Front extends JFXApp {
                 } else {
                   gettingUp = false
                 }
+              }
+              def lean: Unit = {
+                if (leanRight && !leanLeft && !leaningUp && Camera.leaning < 0.5) {
+                    Camera.rotate(0, 0, 10 * sensitivity  / (2*Pi))
+                 } else if (leanLeft && !leanRight && !leaningUp && Camera.leaning > -0.5) {
+                    Camera.rotate(0, 0, -10 * sensitivity  / (2*Pi))
+                 }
               }
               
               
@@ -314,19 +339,24 @@ object Front extends JFXApp {
               }
               
               // If setting velocity to 0, the jumping ends
+              
+              // Moving.
+              
               if (leftPressed) {
-                  Camera.move(truePlayerSpeed * delta * cos(Camera.rotation(1)), 0, -truePlayerSpeed * delta * sin(Camera.rotation(1)))          
+                  Camera.move(truePlayerSpeed * delta * cos(Camera.rotation(1)), 0, -truePlayerSpeed * delta * sin(Camera.rotation(1)))
               }
               if (rightPressed) {
-                  Camera.move(-truePlayerSpeed * delta * cos(Camera.rotation(1)), 0, truePlayerSpeed * delta * sin(Camera.rotation(1)))    
+                  Camera.move(-truePlayerSpeed * delta * cos(Camera.rotation(1)), 0, truePlayerSpeed * delta * sin(Camera.rotation(1))) 
               }
               if (downPressed) {
-                   Camera.move(-truePlayerSpeed * delta * sin(Camera.rotation(1)), 0, -truePlayerSpeed * delta * cos(Camera.rotation(1)))   
+                   Camera.move(-truePlayerSpeed * delta * sin(Camera.rotation(1)), 0, -truePlayerSpeed * delta * cos(Camera.rotation(1))) 
               }
               if (upPressed) {
                   Camera.move(truePlayerSpeed * delta * sin(Camera.rotation(1)), 0, truePlayerSpeed * delta * cos(Camera.rotation(1)))  
               }
               
+              
+              // Zooming.
               if (zoomingIn && !zoomingOut) {
                 Camera.zoomIn
               } else if (!zoomingIn && zoomingOut) {
@@ -334,31 +364,40 @@ object Front extends JFXApp {
               }
               
               
-              
-              
-              
-              
          //-------------------------------------------------------------------------------------------//     
               // Drawing the things with graphicsContext2D
-//              var k = data(0)(0)
-//              println("----------------")
-//              println(k)
-//              println(convertToCanvas(k))
-              val paths = Buffer[Path]()
-              for (shape <- data) {
-                if (shape.length == 3) {
+              
+              // Helper function to rebase the coordinate system to the screen.
+              def convertToCanvas(x : (Double, Double)): (Int, Int) = {
+                    ((((x._1 + 1.0)/2.0) * widthAspect * base).toInt, ((x._2 + 1)/2 * heightAspect * base).toInt)
+              }
+              val max: Double = {
+                if (distances.isEmpty) {
+                  -1
+                } else {
+                  distances.max
+                }
+              }
+              for (index <- data.indices) {
+                if (data(index).length == 3) {
                   gc.stroke = Color.Black
-                  gc.strokePolygon(shape.map(x => (convertToCanvas(x)._1.toDouble, convertToCanvas(x)._2.toDouble) ) )
-                  gc.fill = Color.Orange
-                  gc.fillPolygon(shape.map(x => (convertToCanvas(x)._1.toDouble, convertToCanvas(x)._2.toDouble) ) )
-                } else if (shape.length == 0) {
+                  gc.strokePolygon(data(index).map(x => (convertToCanvas(x)._1.toDouble, convertToCanvas(x)._2.toDouble) ) )
+                  
+                  // ENABLE ONE OF FOLLOWING
+                  
+                  // Darkness scales relative to the farthest object.
+//                  gc.fill = Color.FireBrick.deriveColor(0, 1, 1.2- distances(index)/max, 1)
+                  
+                  // Darkness scales relative to distance, personal favourite
+                  gc.fill = Color.FireBrick.deriveColor(0, 1, 1 - distances(index)/20.0, 1)
+                  
+                  gc.fillPolygon(data(index).map(x => (convertToCanvas(x)._1.toDouble, convertToCanvas(x)._2.toDouble) ) )
+                } else if (data(index).length == 0) {
                   // empty row
                 } else {
                   throw new NotTriangleException("Each element is not of the length of 3")
                 }
               }
-              
-              
               
               
               
@@ -378,6 +417,8 @@ object Front extends JFXApp {
             case KeyCode.A       =>  leftPressed      = true
             case KeyCode.S       =>  downPressed      = true
             case KeyCode.D       =>  rightPressed     = true
+            case KeyCode.E       =>  leanRight        = true
+            case KeyCode.Q       =>  leanLeft         = true
             case KeyCode.Space   =>  spacePressed     = true
             case KeyCode.Control =>  controlPressed   = true
             case KeyCode.Shift   =>  shiftPressed     = true
@@ -395,11 +436,20 @@ object Front extends JFXApp {
             case KeyCode.A       =>  leftPressed        = false
             case KeyCode.S       =>  downPressed        = false
             case KeyCode.D       =>  rightPressed       = false
+            case KeyCode.E       =>  {
+                                     leanRight          = false
+                                     leaningUp          = true
+            }
+            case KeyCode.Q       =>  {
+                                     leanLeft          = false
+                                     leaningUp          = true
+            }
             case KeyCode.Space   =>  spacePressed       = false
             // Releasing control starts getting up process.
             case KeyCode.Control =>{
                                      controlPressed     = false
                                      gettingUp          = true
+                                     leaningUp          = true
             }
             // Similarly releasing shift starts recoveral.
             case KeyCode.Shift   =>{

@@ -28,7 +28,7 @@ object MathHelper {
   /**
    * The plane normal must be normalized
    * 
-   * The factorial part doesn't work.. Might be differences how the 3d space is constructed. The intersection point still remains accurate.
+   * The factorial part doesn't work.. Might be differences in how the 3d space is constructed. The intersection point still remains accurate.
    * I've tried another way and it did not produce an accurate point, so this will do in the limitations of the axioms of the 3d world.
    */
   def lineInterSectPlane(point1: VectorVer, point2: VectorVer, planePoint: VectorVer, planeNormal: VectorVer, accuracy: Double): Option[VectorVer] = {
@@ -88,5 +88,18 @@ object MathHelper {
       
     }
   }
+ 
+  def pointDistanceFromCameraPoint(vec: VectorVer): Double =  {
+    val cam = Camera.pos
+    sqrt(pow((vec.x - cam.x), 2) + pow((vec.z - cam.z), 2) + pow((vec.y - cam.y), 2)) 
+  }
+  def triangleDistanceFromCameraPoint(triangle: Array[VectorVer]): Double =  {
+    val cam = Camera.pos
+    sqrt(pow((triangle(0).x - cam.x), 2)) + sqrt(pow((triangle(0).z - cam.z), 2)) + sqrt(pow((triangle(0).y - cam.y), 2))
+  }
   
+  
+  def centerPointOfTriangle(triangle: Array[VectorVer]) : VectorVer = {
+    VectorVer((triangle(0).x + triangle(1).x + triangle(2).x)/3.0  , (triangle(0).z + triangle(1).z + triangle(2).z)/3.0  ,  (triangle(0).y + triangle(1).y + triangle(2).y)/3.0)
+  }
 }

@@ -1,16 +1,30 @@
 package threeD
 import scala.collection.mutable.Buffer
 import scala.math._
-
+/**
+ * The "player" object. Can move and look around in the world.
+ */
 object Camera {
   var rotation = Buffer[Double](0,0,0)
   def horizontal = rotation(1)
   def vertical   = rotation(0)
-  
+  def leaning    = rotation(2)
   // Redundant is like rocking a ship.
-  def rotate(ver: Double, hor: Double, redundant: Double): Unit = {
-    rotation = Buffer(vertical + ver , horizontal + hor , rotation(2) + redundant)
+  def rotate(ver: Double, hor: Double, rocking: Double): Unit = {
+    var trueVer = ver
+    if (vertical > 0.8 && ver > 0.0) {
+      trueVer = 0.0
+    } else if (vertical < -0.7 && ver < -0.0) {
+      trueVer = 0.0
+    }
+    rotation = Buffer(vertical + trueVer , horizontal + hor , leaning + rocking)
   }
+  
+  def resetLeaning: Unit = {
+    rotation(2) = 0.0
+  }
+  
+  
   def roundRotation: Unit = {
     rotation = rotation.map(k => {
       var holder = k/(2*Pi)
@@ -75,6 +89,7 @@ object Camera {
   def moveTo(xPos: Double, zPos: Double, yPos: Double): Unit = {
     pos = new VectorVer(Array(Array(xPos),Array(zPos), Array(yPos)))
   }
+  
 }
 
 
