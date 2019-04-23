@@ -5,8 +5,7 @@ import scalafx.Includes._
 
 import scalafx.application.JFXApp
 
-import scalafx.scene.input.{KeyCode, KeyEvent, MouseEvent}
-
+import scalafx.scene.input.{KeyCode, KeyCombination, KeyCodeCombination, KeyEvent, MouseEvent}
 //import scalafx.event.ActionEvent
 
 // To keep the mouse in the middle
@@ -15,17 +14,17 @@ import java.awt.{GraphicsEnvironment, GraphicsDevice}
 
 import scalafx.scene.canvas._
 //paths and fill
-import scalafx.scene.{PerspectiveCamera, Group, SceneAntialiasing, Node}
+import scalafx.scene.{Group, SceneAntialiasing, Node}
 import scalafx.scene.shape._
 
 import scalafx.scene.Scene
 import scalafx.scene.paint.Color
 import javafx.scene.Cursor
+import scalafx.scene.text._
 
 //Basic
 import scala.collection.mutable.Buffer
 
-import scalafx.scene.text._
 
 //import javafx.animation.AnimationTimer
 import scalafx.animation.AnimationTimer
@@ -49,7 +48,7 @@ object Front extends JFXApp {
  *  ALSO CREATE OWN WORLDS IN "CSVMaker"!
  */
 //--------------------------------------------------------------------------------//
-  
+    
        
   
         var playerSpeed  : Double       = 1
@@ -73,6 +72,8 @@ object Front extends JFXApp {
         val widthAspect = 4
         val heightAspect = 3
         
+        
+        
 //--------------------------------------------------------------------------------//
         // For loading a CSV file
         val fileName = "data.csv"
@@ -81,10 +82,9 @@ object Front extends JFXApp {
         val objectName = "temple3.obj"
         
         // If false, read object, if true, read CSV
-        val fileIsCSV = false
+        val fileIsCSV = true
 //--------------------------------------------------------------------------------//
 // END OF SETTINGS. 
-        
         
     // Setting up
     Writer
@@ -104,6 +104,8 @@ object Front extends JFXApp {
     val robot = new Robot()
     // Center of the whole screen, independent of monitor size.
     val centerPoint: (Int, Int) = (GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint.getX.toInt, GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint.getY.toInt)
+    val screenSize:  (Double, Double) = (GraphicsEnvironment.getLocalGraphicsEnvironment.getDefaultScreenDevice.getDefaultConfiguration.getBounds.getWidth,
+                                         GraphicsEnvironment.getLocalGraphicsEnvironment.getDefaultScreenDevice.getDefaultConfiguration.getBounds.getHeight)
     
     
     // Take the amount the mouse has moved each frame.
@@ -123,24 +125,28 @@ object Front extends JFXApp {
     private var zoomingIn: Boolean = false
     private var zoomingOut: Boolean = false
     
-//-------------------------------------------------------------------------------------------//
+    private var screenHeightHolder: Double = base * heightAspect
+    private var screenWidthHolder: Double = base * widthAspect
     
+//-------------------------------------------------------------------------------------------//
+    private var goingFull = true
     stage = new JFXApp.PrimaryStage {
-         
+      
       // Creating the size of the stage. Scene is set to same size.
-      width = widthAspect * base
-      height = heightAspect * base
+      private[threeD] def handleFullScreen = {
+        if (goingFull) {
+          this.fullScreen_= (goingFull)
+          this.fullScreenExitHint_=("Press \"F\" to exit full screen.\nESC to quit")
+          this.fullScreenExitKey_=(KeyCombination("f"))
+        }
+      }
       
-      
-      scene = new Scene(root, widthAspect * base, heightAspect * base, depthBuffer = true, antiAliasing = SceneAntialiasing.Balanced) {
-            cursor = Cursor.NONE
-            
+      scene = new Scene(root, screenWidthHolder, screenHeightHolder, depthBuffer = true, antiAliasing = SceneAntialiasing.Balanced) {
+        cursor = Cursor.NONE
         //Drawing happens on the canvas, as it is quicker when dealing with having to re-draw everything every frame.
-        val canvas = new Canvas(widthAspect * base, heightAspect * base)
+        val canvas = new Canvas(screenWidthHolder, screenHeightHolder)
         val gc = canvas.graphicsContext2D
-
 //-----------------------------------------------------------------------------------------------------------------------------------------//
-        
         // Flags, counters, and keepers of game mechanics.
         
         //Related to jumping
@@ -185,12 +191,25 @@ object Front extends JFXApp {
               fullData =  Projector.project
               data = fullData._1
               distances = fullData._2.map(triangle => MathHelper.triangleDistanceFromCameraPoint(triangle))
-              
               Camera.roundRotation
+              
+              
+              // Handling fullscreen transitions
+              if (goingFull) {
+                screenWidthHolder = screenSize._1
+                screenHeightHolder = screenSize._2
+              } else {
+                screenWidthHolder = base * widthAspect
+                screenHeightHolder = base * heightAspect
+              }
+              handleFullScreen
+              canvas.width_=(screenWidthHolder)
+              canvas.height=(screenHeightHolder)
+              
               
               // Starts the canvas as a white background.
               gc.fill = Color.White
-              gc.fillRect(0,0,widthAspect * base,heightAspect * base)
+              gc.fillRect(0,0,screenWidthHolder,screenWidthHolder)
               
         //-------------------------------------------------------------------------------------------//
               
@@ -369,7 +388,7 @@ object Front extends JFXApp {
               
               // Helper function to rebase the coordinate system to the screen.
               def convertToCanvas(x : (Double, Double)): (Int, Int) = {
-                    ((((x._1 + 1.0)/2.0) * widthAspect * base).toInt, ((x._2 + 1)/2 * heightAspect * base).toInt)
+                    ((((x._1 + 1.0)/2.0) * screenWidthHolder).toInt, ((x._2 + 1)/2 * screenHeightHolder).toInt)
               }
               val max: Double = {
                 if (distances.isEmpty) {
@@ -392,12 +411,20 @@ object Front extends JFXApp {
                   gc.fill = Color.FireBrick.deriveColor(0, 1, 1 - distances(index)/20.0, 1)
                   
                   gc.fillPolygon(data(index).map(x => (convertToCanvas(x)._1.toDouble, convertToCanvas(x)._2.toDouble) ) )
+                  
+                  
+                  
                 } else if (data(index).length == 0) {
                   // empty row
                 } else {
                   throw new NotTriangleException("Each element is not of the length of 3")
                 }
               }
+              val relative = staminaLeft / stamina
+              gc.fill = Color.Azure
+              gc.rect(0, 0, 100, 100)
+              
+              
               
               
               
@@ -419,6 +446,7 @@ object Front extends JFXApp {
             case KeyCode.D       =>  rightPressed     = true
             case KeyCode.E       =>  leanRight        = true
             case KeyCode.Q       =>  leanLeft         = true
+            case KeyCode.F       =>  goingFull        = !goingFull
             case KeyCode.Space   =>  spacePressed     = true
             case KeyCode.Control =>  controlPressed   = true
             case KeyCode.Shift   =>  shiftPressed     = true
