@@ -22,7 +22,6 @@ import scala.collection.mutable.Buffer
 import scalafx.scene.paint.Paint
 import java.awt.{GraphicsEnvironment, GraphicsDevice}
 
-import scalafx.application.AppHelper
 
 object BootStrap extends JFXApp {
   val header = Font.font("Gill Sans MT", 20)
@@ -33,7 +32,7 @@ object BootStrap extends JFXApp {
   stage = new JFXApp.PrimaryStage {
         val screenSize:  (Double, Double) = (GraphicsEnvironment.getLocalGraphicsEnvironment.getDefaultScreenDevice.getDefaultConfiguration.getBounds.getWidth,
                                          GraphicsEnvironment.getLocalGraphicsEnvironment.getDefaultScreenDevice.getDefaultConfiguration.getBounds.getHeight)
-       var root = new Group()
+        var root = new Group()
        
         val cont = new Group()
         
@@ -59,6 +58,9 @@ object BootStrap extends JFXApp {
         label2.layoutX = 200
         label2.layoutY = 60
         label2.font = subHeader
+        
+        
+        val startButton = new C.Button("Start")
       
         cont.getChildren.addAll(rectLeft, rectRight, label1, label2)
         

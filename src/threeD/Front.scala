@@ -6,6 +6,7 @@ import scalafx.Includes._
 import scalafx.application.JFXApp
 
 import scalafx.scene.input.{KeyCode, KeyCombination, KeyCodeCombination, KeyEvent, MouseEvent}
+import scalafx.event.ActionEvent
 //import scalafx.event.ActionEvent
 
 // To keep the mouse in the middle
@@ -21,10 +22,19 @@ import scalafx.scene.Scene
 import scalafx.scene.paint.Color
 import javafx.scene.Cursor
 import scalafx.scene.text._
+import scalafx.scene.text.Font
+import scalafx.scene.layout._
+import scalafx.geometry.{Insets}
+
+
+import scalafx.scene.{shape => S}
+
+import scalafx.scene.{control => C}
+import scalafx.scene.effect._
 
 //Basic
 import scala.collection.mutable.Buffer
-
+import scala.collection.mutable.Queue
 
 //import javafx.animation.AnimationTimer
 import scalafx.animation.AnimationTimer
@@ -95,8 +105,7 @@ object Front extends JFXApp {
     
     
     
-    // ScalaFx specific requirements
-    val root = new Group()
+    
         
         
         
@@ -106,6 +115,12 @@ object Front extends JFXApp {
     val centerPoint: (Int, Int) = (GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint.getX.toInt, GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint.getY.toInt)
     val screenSize:  (Double, Double) = (GraphicsEnvironment.getLocalGraphicsEnvironment.getDefaultScreenDevice.getDefaultConfiguration.getBounds.getWidth,
                                          GraphicsEnvironment.getLocalGraphicsEnvironment.getDefaultScreenDevice.getDefaultConfiguration.getBounds.getHeight)
+    
+    // Fonts
+    val header = Font.font("Gill Sans MT", 20)
+    val subHeader = Font.font("Gill Sans MT", 15)
+    val text = Font.font("Gill Sans MT", 12)
+    val defaultColor = Color.AliceBlue
     
     
     // Take the amount the mouse has moved each frame.
@@ -131,17 +146,135 @@ object Front extends JFXApp {
 //-------------------------------------------------------------------------------------------//
     private var goingFull = true
     stage = new JFXApp.PrimaryStage {
-      
-      // Creating the size of the stage. Scene is set to same size.
-      private[threeD] def handleFullScreen = {
-        if (goingFull) {
-          this.fullScreen_= (goingFull)
-          this.fullScreenExitHint_=("Press \"F\" to exit full screen.\nESC to quit")
-          this.fullScreenExitKey_=(KeyCombination("f"))
+        // Creating the size of the stage. Scene is set to same size.
+        private[threeD] def handleFullScreen = {
+          if (goingFull) {
+            this.fullScreen_= (goingFull)
+            this.fullScreenExitHint_=("Press \"F\" to exit full screen.\nESC to quit")
+            this.fullScreenExitKey_=(KeyCombination("f"))
+          }
+        }  
+        
+//-----------------------------------------------------------------------------------------------------------------------------//
+       
+       val startRoot = new Group()
+       val bootstrap: Scene = new Scene(screenWidthHolder, screenHeightHolder) {
+            val startButton = new C.Button("Start")
+            startButton.font = header
+            
+            val optionsButton = new C.Button("Options")
+            optionsButton.font = header
+
+            val quitButton = new C.Button("Quit")
+            quitButton.font = header
+
+            val box = new VBox(20)
+            box.spacing.bind(10)
+            box.padding = Insets(100)
+            box.children = List(startButton, optionsButton, quitButton)
+            
+            
+            val label1 = new C.Label("threeD")
+            label1.font = header
+            
+            val pane = new BorderPane
+            pane.center = box
+            pane.top = label1
+            
+            
+            // Setting the content
+            content = box
+            
+            // Event handlers 
+            startButton.onAction = (e: ActionEvent) => {
+              scene = threeD
+            }
+            optionsButton.onAction = (e: ActionEvent) => {
+              scene = options
+            }
+            quitButton.onAction = (e: ActionEvent) => {
+              System.exit(1)
+            }
+            onKeyPressed = (event: KeyEvent) => {
+              event.code match {
+                case KeyCode.Enter  =>  
+                case KeyCode.Escape  =>  System.exit(1)
+                case KeyCode.F       =>  goingFull        = !goingFull
+                case _ =>
+              }
+            }
         }
-      }
-      
-      scene = new Scene(root, screenWidthHolder, screenHeightHolder, depthBuffer = true, antiAliasing = SceneAntialiasing.Balanced) {
+        
+//-----------------------------------------------------------------------------------------------------------------------------//
+
+        val optionsRoot = new Group()
+        val options: Scene = new Scene {
+            // Content for the bootstrap and options screens.
+            val ds = new DropShadow(200, Color.Black)
+            ds.setOffsetX(5)
+            ds.setOffsetY(5)
+            ds.setColor(Color.Black)
+            
+            val label1 = new C.Label("threeD")
+            label1.font = header
+            label1.effect = ds
+            
+            val label2 = C.Label("Settings")
+            label2.font = subHeader
+            
+            val button = new C.Button("click")
+            button.setEffect(ds)
+            
+            val optionsButton = new C.ToggleButton("Flying")
+            optionsButton.font = header
+
+            val toggle = new C.CheckBox
+            toggle.font = header
+            
+            val test = new C.ComboBox("moi")
+            
+            val test2 = new Text("moi")
+            test2.font = subHeader
+            
+            
+            val grid = new GridPane()
+            grid.add(label1, 0, 0)
+            grid.add(label2, 0, 1)
+            grid.add(button, 0, 2)
+            grid.add(optionsButton, 0, 3)
+            grid.add(toggle, 0, 4)
+            grid.add(test, 0, 5)
+            grid.add(test2, 0, 7)
+            grid.padding = Insets(20)
+          
+          
+            
+            optionsRoot.getChildren.addAll(label1)
+            content = grid
+            
+//            stylesheets += getClass().getResource("/options.css").toExternalForm()
+            
+            // Event handlers 
+            button.onAction = (e: ActionEvent) => {
+              
+            }
+            
+            
+            onKeyPressed = (event: KeyEvent) => {
+              event.code match {
+                case KeyCode.Escape  =>  scene = bootstrap
+                case KeyCode.Shift   =>  println(screenHeightHolder)
+                case KeyCode.F       =>  goingFull        = !goingFull
+                case _ =>
+              }
+            }
+        }
+//-----------------------------------------------------------------------------------------------------------------------------//
+        
+        
+      // Main screen.
+      val threeDRoot = new Group()
+      val threeD: Scene = new Scene(threeDRoot, screenWidthHolder, screenHeightHolder, depthBuffer = true, antiAliasing = SceneAntialiasing.Balanced) {
         cursor = Cursor.NONE
         //Drawing happens on the canvas, as it is quicker when dealing with having to re-draw everything every frame.
         val canvas = new Canvas(screenWidthHolder, screenHeightHolder)
@@ -512,6 +645,7 @@ object Front extends JFXApp {
         content = canvas
         title = "3D"
       }  // End of scene
+      scene = bootstrap
    }     // End of stage
 }        // End of App
 // As seen from the ending above, everything is done inside the scene, on the canvas, within the timer loop.

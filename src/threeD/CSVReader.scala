@@ -12,7 +12,6 @@ object CSVReader {
       val resourcesDir = currentDir + "/src/resources/"
       resourcesDir + Front.fileName
   }
-  
   def readCSV: Array[Array[Double]] = {
     try { 
       val csv = Source.fromFile(this.filePath).getLines().toArray
@@ -27,5 +26,13 @@ object CSVReader {
       case e: NumberFormatException => println("Does not contain only valid coordinates"); System.exit(1) ; Array(Array(-1.0))
     }
     
+  }
+  
+  
+  def fileHelper(name: String) = {
+    //Finding the file
+      val currentDir = Paths.get(".").toAbsolutePath().normalize().toString()
+      val resourcesDir = currentDir + "/src/resources/"
+      resourcesDir + name
   }
 }
