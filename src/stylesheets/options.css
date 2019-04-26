@@ -1,0 +1,36 @@
+.button {
+	-fx-background-color: transparent;
+	-fx-text-fill:  #3D9970;
+	-fx-border-color: #3D9970;
+}
+.button:hover {
+	-fx-text-fill:  white;
+	-fx-background-color: #3D9970;
+}
+.button:focused {
+	-fx-text-fill:  white;
+	-fx-background-color: #3D9970;
+}
+.label {
+	-fx-text-fill:  #3D9970;
+}
+
+
+
+.check-box>.box {
+  -fx-background-insets: 0;
+  -fx-background-radius: 0;
+  -fx-background-color: transparent;
+}
+
+.check-box>.box>.mark {
+  -fx-background-image: url("unchecked.png");
+  -fx-background-position: center;
+  -fx-background-repeat: stretch;
+  -fx-shape: none;
+}
+
+.check-box:selected>.box>.mark{
+  -fx-background-color: transparent;
+  -fx-background-image: url("checked.png");
+}

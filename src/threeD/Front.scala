@@ -8,7 +8,7 @@ import scalafx.application.JFXApp
 import scalafx.scene.input.{KeyCode, KeyCombination, KeyCodeCombination, KeyEvent, MouseEvent}
 import scalafx.event.ActionEvent
 //import scalafx.event.ActionEvent
-
+import scalafx.beans.value.ObservableValue
 // To keep the mouse in the middle
 import java.awt.Robot
 import java.awt.{GraphicsEnvironment, GraphicsDevice}
@@ -25,6 +25,7 @@ import scalafx.scene.text._
 import scalafx.scene.text.Font
 import scalafx.scene.layout._
 import scalafx.geometry.{Insets}
+import scalafx.scene.image.Image
 
 
 import scalafx.scene.{shape => S}
@@ -40,7 +41,6 @@ import scala.collection.mutable.Queue
 import scalafx.animation.AnimationTimer
 
 import scala.math._
-
 
 
       
@@ -62,31 +62,31 @@ object Front extends JFXApp {
        
   
         var playerSpeed  : Double       = 1
-        val sensitivity  : Double       = 2 * pow(10, -3)
-        val stamina      : Double       = 5
+        var sensitivity  : Double       = 2 * pow(10, -3)
+        var stamina      : Double       = 5
         // Recoveral time in seconds.
-        val recoveralTime: Double       = 1.0
-        val doubleJump   : Boolean      = true
-        val endlessStamina: Boolean     = false
-        val flying       : Boolean      = true
+        var recoveralTime: Double       = 1.0
+        var doubleJump   : Boolean      = true
+        var endlessStamina: Boolean     = false
+        var flying       : Boolean      = true
         
 //--------------------------------------------------------------------------------//
         
          // Clips the triangle behind camera, but decreases performance
-        val clippingEnabled             = false
+        var clippingEnabled             = false
         
 //--------------------------------------------------------------------------------//
   
         // Setting the size of the scene
         val base = 250
-        val widthAspect = 4
-        val heightAspect = 3
+        var widthAspect = 4
+        var heightAspect = 3
         
         
         
 //--------------------------------------------------------------------------------//
         // For loading a CSV file
-        val fileName = "data.csv"
+        var fileName = "data.csv"
         
         // For loading a object file
         val objectName = "temple3.obj"
@@ -117,11 +117,9 @@ object Front extends JFXApp {
                                          GraphicsEnvironment.getLocalGraphicsEnvironment.getDefaultScreenDevice.getDefaultConfiguration.getBounds.getHeight)
     
     // Fonts
-    val header = Font.font("Gill Sans MT", 20)
-    val subHeader = Font.font("Gill Sans MT", 15)
-    val text = Font.font("Gill Sans MT", 12)
-    val defaultColor = Color.AliceBlue
-    
+    val header = Font.font("Segoe UI", 32)
+    val subHeader = Font.font("Segoe UI", 20)
+    val defaultColor = Color.Black
     
     // Take the amount the mouse has moved each frame.
     private var mouseDeltaX: Double = .0
@@ -144,7 +142,7 @@ object Front extends JFXApp {
     private var screenWidthHolder: Double = base * widthAspect
     
 //-------------------------------------------------------------------------------------------//
-    private var goingFull = true
+    private var goingFull = false
     stage = new JFXApp.PrimaryStage {
         // Creating the size of the stage. Scene is set to same size.
         private[threeD] def handleFullScreen = {
@@ -159,34 +157,47 @@ object Front extends JFXApp {
        
        val startRoot = new Group()
        val bootstrap: Scene = new Scene(screenWidthHolder, screenHeightHolder) {
+            val ds = new DropShadow(200, Color.Black)
+            ds.setOffsetX(5)
+            ds.setOffsetY(5)
+            ds.setColor(Color.Black)
+         
+           
             val startButton = new C.Button("Start")
-            startButton.font = header
+            startButton.font = subHeader
             
             val optionsButton = new C.Button("Options")
-            optionsButton.font = header
+            optionsButton.font = subHeader
 
             val quitButton = new C.Button("Quit")
-            quitButton.font = header
+            quitButton.font = subHeader
 
-            val box = new VBox(20)
-            box.spacing.bind(10)
-            box.padding = Insets(100)
-            box.children = List(startButton, optionsButton, quitButton)
-            
-            
-            val label1 = new C.Label("threeD")
+             val label1 = new C.Label("threeD")
             label1.font = header
+            label1.effect = ds
             
-            val pane = new BorderPane
-            pane.center = box
-            pane.top = label1
+            val box = new VBox(screenHeightHolder/ 6 )
+            box.padding = Insets(screenHeightHolder /6.0,0, screenHeightHolder, screenWidthHolder/2.2)
+            box.children = List(label1, startButton, optionsButton, quitButton)
             
             
             // Setting the content
-            content = box
+            root = box
+            
+            
+            width.onChange((observable, oldvalue, newvalue) => {
+              box.padding = Insets(box.padding.value.top, 0, 0, newvalue.doubleValue()/2.2)
+            })
+            height.onChange((observable, oldvalue, newvalue) => {
+              box.padding = Insets(newvalue.doubleValue()/6.0, 0, 0, box.padding.value.left)
+              box.spacing = box.spacing.value * (newvalue.doubleValue()/oldvalue.doubleValue())
+            })
+            
+            stylesheets += "stylesheets/bootstrap.css"
             
             // Event handlers 
             startButton.onAction = (e: ActionEvent) => {
+              goingFull = !goingFull
               scene = threeD
             }
             optionsButton.onAction = (e: ActionEvent) => {
@@ -199,7 +210,7 @@ object Front extends JFXApp {
               event.code match {
                 case KeyCode.Enter  =>  
                 case KeyCode.Escape  =>  System.exit(1)
-                case KeyCode.F       =>  goingFull        = !goingFull
+                case KeyCode.F       => goingFull        = !goingFull
                 case _ =>
               }
             }
@@ -208,67 +219,348 @@ object Front extends JFXApp {
 //-----------------------------------------------------------------------------------------------------------------------------//
 
         val optionsRoot = new Group()
-        val options: Scene = new Scene {
+        val options: Scene = new Scene(screenWidthHolder, screenHeightHolder) {
             // Content for the bootstrap and options screens.
             val ds = new DropShadow(200, Color.Black)
             ds.setOffsetX(5)
             ds.setOffsetY(5)
             ds.setColor(Color.Black)
             
-            val label1 = new C.Label("threeD")
-            label1.font = header
-            label1.effect = ds
             
-            val label2 = C.Label("Settings")
-            label2.font = subHeader
             
-            val button = new C.Button("click")
-            button.setEffect(ds)
-            
-            val optionsButton = new C.ToggleButton("Flying")
-            optionsButton.font = header
+            // Headers
+            val header1 = new C.Label {
+              text = "Options"
+              font = header
+            }
 
-            val toggle = new C.CheckBox
-            toggle.font = header
+//--------------------------------------------------------//
             
-            val test = new C.ComboBox("moi")
             
-            val test2 = new Text("moi")
-            test2.font = subHeader
+            
+            
+            
+            
+//--------------------------------------------------------//
+            // Stats
+            val header2 = new C.Label {
+              text = "Stats"
+              font = header
+            }
+            val label4 = new C.Label {
+              text = "Speed"
+              font = subHeader
+              effect = ds
+            }
+            val slider1 = new C.Slider {
+              min = 1.0
+              max = 5.0
+              value = 3.0
+              showTickMarks = true
+              showTickLabels = true
+              blockIncrement = 0.1
+              majorTickUnit = 5.0
+            }
+            val label5 = new C.Label {
+              text = "Time to recover"
+              font = subHeader
+              effect = ds
+            }
+            val slider2 = new C.Slider {
+              min = 1.0
+              max = 5.0
+              value = 3.0
+              showTickMarks = true
+              showTickLabels = true
+              blockIncrement = 0.1
+              majorTickUnit = 5.0
+            }
+            val label6 = new C.Label {
+              text = "Sensitivity"
+              font = subHeader
+              effect = ds
+            }
+            val slider3 = new C.Slider {
+              min = 1.0
+              max = 5.0
+              value = 3.0
+              showTickMarks = true
+              showTickLabels = true
+              blockIncrement = 0.1
+              majorTickUnit = 5.0
+            }
+            val label7 = new C.Label {
+              text = "Stamina"
+              font = subHeader
+              effect = ds
+            }
+            val slider4 = new C.Slider {
+              min = 1.0
+              max = 5.0
+              value = 3.0
+              showTickMarks = true
+              showTickLabels = true
+              blockIncrement = 0.1
+              majorTickUnit = 5.0
+            }
+//--------------------------------------------------------//
+            
+            
+            // Cheats
+            val header4 = new C.Label {
+              text = "Cheats"
+              font = header
+            }
+            val label1 = new C.Label {
+              text = "Double jump"
+              font = subHeader
+              effect = ds
+            }
+            val check1 = new C.CheckBox {
+              this.selected.onChange(doubleJump = !doubleJump)
+              effect = ds
+            }
+            val label2 = new C.Label {
+              text = "Flying"
+              font = subHeader
+              effect = ds
+            }
+            val check2 = new C.CheckBox {
+              this.selected.onChange(flying = !flying)
+              effect = ds
+            }
+            val label3 = new C.Label {
+              text = "Endless Stamina"
+              font = subHeader
+              effect = ds
+            }
+            val check3 = new C.CheckBox {
+              this.selected.onChange(endlessStamina = !endlessStamina)
+              effect = ds
+            }
+//--------------------------------------------------------//
+            val button1 = new C.Button {
+              text = "View more"
+              font = subHeader
+            }
+            val button2 = new C.Button {
+              text = "Back"
+              font = subHeader
+            }
+ 
+            
             
             
             val grid = new GridPane()
-            grid.add(label1, 0, 0)
-            grid.add(label2, 0, 1)
-            grid.add(button, 0, 2)
-            grid.add(optionsButton, 0, 3)
-            grid.add(toggle, 0, 4)
-            grid.add(test, 0, 5)
-            grid.add(test2, 0, 7)
-            grid.padding = Insets(20)
-          
-          
+            grid.add(header1, 0, 0)
             
-            optionsRoot.getChildren.addAll(label1)
+            // Stats
+            grid.add(header2, 0, 1)
+            grid.add(label4, 0, 2)
+            grid.add(slider1,0, 3)
+            grid.add(label5, 1, 2)
+            grid.add(slider2,1, 3)
+            grid.add(label6, 2, 2)
+            grid.add(slider3,2, 3)
+            grid.add(label7, 3, 2)
+            grid.add(slider4,3, 3)
+            
+            // Cheats
+            grid.add(header4, 0, 4)
+            grid.add(label1, 0, 5)
+            grid.add(check1, 0, 6)
+            grid.add(label2, 1, 5)
+            grid.add(check2, 1, 6)
+            grid.add(label3, 2, 5)
+            grid.add(check3, 2, 6)
+            
+            
+            
+            val subGrid = new GridPane()
+            subGrid.add(button1, 0, 0)
+            subGrid.add(button2, 1, 0)
+            subGrid.hgap = 10
+            grid.add(subGrid, 3, 0)
+            
+            
+            
+            
+//--------------------------------------------------------//  
+            
+            
+            grid.padding = Insets(screenHeightHolder /8.0,screenWidthHolder/8.0, 0, screenWidthHolder/8.0)
+            grid.vgap = screenHeightHolder /12.0
+            grid.hgap = screenWidthHolder /12.0
+            
+//            optionsRoot.getChildren.addAll(label1)
             content = grid
             
-//            stylesheets += getClass().getResource("/options.css").toExternalForm()
-            
+            stylesheets += "stylesheets/options.css"
+
             // Event handlers 
-            button.onAction = (e: ActionEvent) => {
-              
-            }
-            
+            width.onChange((observable, oldvalue, newvalue) => {
+              grid.padding = Insets(grid.padding.value.top, newvalue.doubleValue()/8.0, 0, newvalue.doubleValue()/8.0)
+              grid.hgap = newvalue.doubleValue() / 12.0
+            })
+            height.onChange((observable, oldvalue, newvalue) => {
+              grid.padding = Insets(newvalue.doubleValue()/8.0, 0, 0, grid.padding.value.left)
+              grid.vgap = newvalue.doubleValue() / 12.0
+
+            })
             
             onKeyPressed = (event: KeyEvent) => {
               event.code match {
                 case KeyCode.Escape  =>  scene = bootstrap
-                case KeyCode.Shift   =>  println(screenHeightHolder)
                 case KeyCode.F       =>  goingFull        = !goingFull
                 case _ =>
               }
             }
+            button1.onAction = (e: ActionEvent) => {
+              scene = more
+            }
+            button2.onAction = (e: ActionEvent) => {
+              scene = bootstrap
+            }
         }
+//-----------------------------------------------------------------------------------------------------------------------------//
+        val moreRoot = new Group()
+        val more: Scene = new Scene(screenWidthHolder, screenHeightHolder) {
+            // Content for the bootstrap and options screens.
+            val ds = new DropShadow(200, Color.Black)
+            ds.setOffsetX(5)
+            ds.setOffsetY(5)
+            ds.setColor(Color.Black)
+            
+            
+            
+            // Headers
+            val header1 = new C.Label {
+              text = "Options"
+              font = header
+            }
+            
+//--------------------------------------------------------//
+            // Size
+            val header5 = new C.Label {
+              text = "Aspect Ratio"
+              font = subHeader
+              effect = ds
+            }
+            
+            val menu1 = new C.ComboBox(Seq((4,3),(7,5),(16,9),(21,9))) {
+              this.onAction = (e: ActionEvent) => {
+                widthAspect = this.value.value._1
+                heightAspect = this.value.value._2
+              }
+             
+            }
+//--------------------------------------------------------//
+            
+            // File loading
+            val header6 = new C.Label {
+              text = "File Name"
+              font = subHeader
+            }
+            val textField = new C.TextField {
+              promptText = "e.g. data.csv"
+            }
+//--------------------------------------------------------//
+            
+            // Performance
+            val header3 = new C.Label {
+              text = "Performance"
+              font = subHeader
+            }
+            val perf = new C.CheckBox {
+              this.selected.onChange(clippingEnabled = !clippingEnabled)
+              effect = ds
+            }
+//--------------------------------------------------------// 
+            val button1 = new C.Button {
+              text = "Back"
+              font = subHeader
+            }
+ 
+            
+            
+                 
+            
+            
+            
+//--------------------------------------------------------//       
+            val grid = new GridPane()
+            grid.add(header1, 0, 0)
+            
+            
+            
+            // Performance
+            grid.add(header3, 0, 1)
+            grid.add(perf, 0, 2)
+            
+            // Size
+            grid.add(header5, 1, 1)
+            grid.add(menu1, 1, 2)
+            
+            
+            // File loading
+            grid.add(header6, 2, 1)
+            grid.add(textField, 2, 2)
+            
+            
+            grid.add(button1, 3, 0)
+//--------------------------------------------------------// 
+            
+            
+            grid.padding = Insets(screenHeightHolder /8.0,screenWidthHolder/8.0, 0, screenWidthHolder/8.0)
+            grid.vgap = screenHeightHolder /12.0
+            grid.hgap = screenWidthHolder /12.0
+            
+//            optionsRoot.getChildren.addAll(label1)
+            content = grid
+            
+            stylesheets += "stylesheets/options.css"
+            
+            
+            
+            
+//--------------------------------------------------------// 
+            
+            
+            // Event handlers 
+            width.onChange((observable, oldvalue, newvalue) => {
+              grid.padding = Insets(grid.padding.value.top, newvalue.doubleValue()/8.0, 0, newvalue.doubleValue()/8.0)
+              grid.hgap = newvalue.doubleValue() / 12.0
+            })
+            height.onChange((observable, oldvalue, newvalue) => {
+              grid.padding = Insets(newvalue.doubleValue()/8.0, 0, 0, grid.padding.value.left)
+              grid.vgap = newvalue.doubleValue() / 12.0
+
+            })
+            
+            
+            onKeyPressed = (event: KeyEvent) => {
+              event.code match {
+                case KeyCode.Escape  =>  scene = options
+                case KeyCode.F       =>  goingFull        = !goingFull
+                case _ =>
+              }
+            }
+            button1.onAction = (e: ActionEvent) => {
+              scene = options
+            }
+        }
+//--------------------------------------------------------//
+            
+            
+            
+            
+            
+            
+//--------------------------------------------------------//
+        
+        
+        
+        
 //-----------------------------------------------------------------------------------------------------------------------------//
         
         

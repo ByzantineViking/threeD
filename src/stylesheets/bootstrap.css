@@ -1,0 +1,16 @@
+.button {
+	-fx-background-color: transparent;
+	-fx-text-fill:  #3D9970;
+	-fx-border-color: #3D9970;
+}
+.button:hover {
+	-fx-text-fill:  white;
+	-fx-background-color: #3D9970;
+}
+.button:focused {
+	-fx-text-fill:  white;
+	-fx-background-color: #3D9970;
+}
+.label {
+	-fx-text-fill:  #3D9970;
+}
