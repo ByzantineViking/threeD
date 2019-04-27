@@ -17,20 +17,3 @@
 
 
 
-.check-box>.box {
-  -fx-background-insets: 0;
-  -fx-background-radius: 0;
-  -fx-background-color: transparent;
-}
-
-.check-box>.box>.mark {
-  -fx-background-image: url("unchecked.png");
-  -fx-background-position: center;
-  -fx-background-repeat: stretch;
-  -fx-shape: none;
-}
-
-.check-box:selected>.box>.mark{
-  -fx-background-color: transparent;
-  -fx-background-image: url("checked.png");
-}

@@ -62,13 +62,13 @@ object Front extends JFXApp {
        
   
         var playerSpeed  : Double       = 1
-        var sensitivity  : Double       = 2 * pow(10, -3)
+        var sensitivity  : Double       = 3 * pow(10, -3)
         var stamina      : Double       = 5
         // Recoveral time in seconds.
         var recoveralTime: Double       = 1.0
-        var doubleJump   : Boolean      = true
+        var doubleJump   : Boolean      = false
         var endlessStamina: Boolean     = false
-        var flying       : Boolean      = true
+        var flying       : Boolean      = false
         
 //--------------------------------------------------------------------------------//
         
@@ -118,8 +118,12 @@ object Front extends JFXApp {
     
     // Fonts
     val header = Font.font("Segoe UI", 32)
-    val subHeader = Font.font("Segoe UI", 20)
+    val subHeader = Font.font("Segoe UI", 18)
     val defaultColor = Color.Black
+    
+    
+    var staminaLeft = stamina
+    var recoveralTimeLeft = recoveralTime
     
     // Take the amount the mouse has moved each frame.
     private var mouseDeltaX: Double = .0
@@ -347,7 +351,7 @@ object Front extends JFXApp {
               text = "Back"
               font = subHeader
             }
- 
+            
             
             
             
@@ -380,8 +384,7 @@ object Front extends JFXApp {
             subGrid.add(button1, 0, 0)
             subGrid.add(button2, 1, 0)
             subGrid.hgap = 10
-            grid.add(subGrid, 3, 0)
-            
+            grid.add(subGrid, 2, 0)
             
             
             
@@ -421,6 +424,22 @@ object Front extends JFXApp {
             button2.onAction = (e: ActionEvent) => {
               scene = bootstrap
             }
+            
+            slider1.valueProperty().onChange((observable, oldvalue, newvalue) => {
+              playerSpeed = (newvalue.doubleValue()/3.0)
+            })
+            slider2.valueProperty().onChange((observable, oldvalue, newvalue) => {
+              recoveralTime      = (newvalue.doubleValue()/3.0) * 2.0
+              recoveralTimeLeft  = (newvalue.doubleValue()/3.0) * 2.0
+            })
+            slider3.valueProperty().onChange((observable, oldvalue, newvalue) => {
+              sensitivity = (newvalue.doubleValue()/3.0)* 2.0 * pow(10, -3)
+            })
+            slider4.valueProperty().onChange((observable, oldvalue, newvalue) => {
+              stamina = (newvalue.doubleValue()/3.0)*5.0
+              staminaLeft = (newvalue.doubleValue()/3.0)*5.0
+            })
+            
         }
 //-----------------------------------------------------------------------------------------------------------------------------//
         val moreRoot = new Group()
@@ -449,6 +468,7 @@ object Front extends JFXApp {
             
             val menu1 = new C.ComboBox(Seq((4,3),(7,5),(16,9),(21,9))) {
               this.onAction = (e: ActionEvent) => {
+                this.value.value._2 /1000.0
                 widthAspect = this.value.value._1
                 heightAspect = this.value.value._2
               }
@@ -507,7 +527,7 @@ object Front extends JFXApp {
             grid.add(textField, 2, 2)
             
             
-            grid.add(button1, 3, 0)
+            grid.add(button1, 2, 0)
 //--------------------------------------------------------// 
             
             
@@ -528,11 +548,11 @@ object Front extends JFXApp {
             
             // Event handlers 
             width.onChange((observable, oldvalue, newvalue) => {
-              grid.padding = Insets(grid.padding.value.top, newvalue.doubleValue()/8.0, 0, newvalue.doubleValue()/8.0)
+              grid.padding = Insets(grid.padding.value.top, 0, 0, newvalue.doubleValue()/oldvalue.doubleValue()*grid.padding.value.left)
               grid.hgap = newvalue.doubleValue() / 12.0
             })
             height.onChange((observable, oldvalue, newvalue) => {
-              grid.padding = Insets(newvalue.doubleValue()/8.0, 0, 0, grid.padding.value.left)
+              grid.padding = Insets(newvalue.doubleValue()/oldvalue.doubleValue()*grid.padding.value.top, 0, 0, grid.padding.value.left)
               grid.vgap = newvalue.doubleValue() / 12.0
 
             })
@@ -584,16 +604,16 @@ object Front extends JFXApp {
         
         var truePlayerSpeed: Double = playerSpeed
         
+        
         //  Sprinting
         var sprinting = false
         
         //  Stamina  
         //  It re-charges all the time, but if it runs out, a waiting period of recoveralTime (in settings) is gone through,
         //  after which stamina starts to re-charge. If you have ran out, you must wait till it's over half before running or jumping again.
-        var staminaLeft = stamina
+        
         var recovering = false
         var replenishing = false
-        var trueRecoveralTime = recoveralTime
         
         //  Flags for crouching
         var crouching = false
@@ -654,10 +674,10 @@ object Front extends JFXApp {
                   if (replenishing) {
                     staminaLeft += 0.01
                   } else {
-                    trueRecoveralTime -= delta
-                    if (trueRecoveralTime <= 0) {
+                    recoveralTimeLeft -= delta
+                    if (recoveralTimeLeft <= 0) {
                       replenishing = true
-                      trueRecoveralTime = recoveralTime
+                      recoveralTimeLeft = recoveralTime
                     }
                   }
                 } else if (staminaLeft < stamina) {
@@ -799,7 +819,6 @@ object Front extends JFXApp {
                   Camera.move(truePlayerSpeed * delta * sin(Camera.rotation(1)), 0, truePlayerSpeed * delta * cos(Camera.rotation(1)))  
               }
               
-              
               // Zooming.
               if (zoomingIn && !zoomingOut) {
                 Camera.zoomIn
@@ -846,9 +865,13 @@ object Front extends JFXApp {
                 }
               }
               val relative = staminaLeft / stamina
-              gc.fill = Color.Azure
-              gc.rect(0, 0, 100, 100)
+              gc.fill = Color.rgb(61, 153, 122, .50)
+              gc.fillRoundRect(screenWidthHolder - screenWidthHolder/1.5, screenHeightHolder - screenHeightHolder/ 8.0, scala.math.min(600 * relative, 600),30, 30, 30 )
               
+              
+//              println(screenWidthHolder)
+              gc.stroke = Color.rgb(61, 153, 122, 1)
+              gc.strokeRoundRect(screenWidthHolder - screenWidthHolder/1.5, screenHeightHolder - screenHeightHolder/ 8.0, 600,30, 30, 30 )
               
               
               
@@ -935,7 +958,7 @@ object Front extends JFXApp {
         
         //Scene settings.
         content = canvas
-        title = "3D"
+        title = "threeD"
       }  // End of scene
       scene = bootstrap
    }     // End of stage

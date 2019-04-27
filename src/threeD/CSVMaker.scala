@@ -236,7 +236,6 @@ object Writer {
     
     // A grand staircase.
     file.write(magnificentStairs(0.5,0,1))
-    file.write(wideHallwayNorth(-1, 3.5, 5, 10))
     
     
     file.close()
