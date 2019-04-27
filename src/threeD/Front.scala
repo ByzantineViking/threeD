@@ -25,7 +25,7 @@ import scalafx.scene.text._
 import scalafx.scene.text.Font
 import scalafx.scene.layout._
 import scalafx.geometry.{Insets}
-import scalafx.scene.image.Image
+import scalafx.scene.image.{Image, ImageView}
 
 
 import scalafx.scene.{shape => S}
@@ -86,13 +86,11 @@ object Front extends JFXApp {
         
 //--------------------------------------------------------------------------------//
         // For loading a CSV file
-        var fileName = "data.csv"
-        
-        // For loading a object file
-        val objectName = "temple3.obj"
+        var fileName = "data"
+        var fileEnding = ".csv"
         
         // If false, read object, if true, read CSV
-        val fileIsCSV = true
+        var fileIsCSV = true
 //--------------------------------------------------------------------------------//
 // END OF SETTINGS. 
         
@@ -147,6 +145,13 @@ object Front extends JFXApp {
     
 //-------------------------------------------------------------------------------------------//
     private var goingFull = false
+    
+    private var dragging = false
+    
+    
+    
+    
+    
     stage = new JFXApp.PrimaryStage {
         // Creating the size of the stage. Scene is set to same size.
         private[threeD] def handleFullScreen = {
@@ -161,6 +166,8 @@ object Front extends JFXApp {
        
        val startRoot = new Group()
        val bootstrap: Scene = new Scene(screenWidthHolder, screenHeightHolder) {
+           
+            
             val ds = new DropShadow(200, Color.Black)
             ds.setOffsetX(5)
             ds.setOffsetY(5)
@@ -191,13 +198,17 @@ object Front extends JFXApp {
             
             width.onChange((observable, oldvalue, newvalue) => {
               box.padding = Insets(box.padding.value.top, 0, 0, newvalue.doubleValue()/2.2)
+              screenWidthHolder = newvalue.doubleValue()
             })
             height.onChange((observable, oldvalue, newvalue) => {
               box.padding = Insets(newvalue.doubleValue()/6.0, 0, 0, box.padding.value.left)
               box.spacing = box.spacing.value * (newvalue.doubleValue()/oldvalue.doubleValue())
+              screenHeightHolder = newvalue.doubleValue()
             })
             
             stylesheets += "stylesheets/bootstrap.css"
+            
+            
             
             // Event handlers 
             startButton.onAction = (e: ActionEvent) => {
@@ -351,6 +362,10 @@ object Front extends JFXApp {
               text = "Back"
               font = subHeader
             }
+            val button3 = new C.Button {
+              text = "Controls"
+              font = subHeader
+            }
             
             
             
@@ -385,6 +400,7 @@ object Front extends JFXApp {
             subGrid.add(button2, 1, 0)
             subGrid.hgap = 10
             grid.add(subGrid, 2, 0)
+            grid.add(button3, 3, 0)
             
             
             
@@ -404,10 +420,12 @@ object Front extends JFXApp {
             width.onChange((observable, oldvalue, newvalue) => {
               grid.padding = Insets(grid.padding.value.top, newvalue.doubleValue()/8.0, 0, newvalue.doubleValue()/8.0)
               grid.hgap = newvalue.doubleValue() / 12.0
+              screenWidthHolder = newvalue.doubleValue()
             })
             height.onChange((observable, oldvalue, newvalue) => {
               grid.padding = Insets(newvalue.doubleValue()/8.0, 0, 0, grid.padding.value.left)
               grid.vgap = newvalue.doubleValue() / 12.0
+              screenHeightHolder = newvalue.doubleValue()
 
             })
             
@@ -423,6 +441,9 @@ object Front extends JFXApp {
             }
             button2.onAction = (e: ActionEvent) => {
               scene = bootstrap
+            }
+            button3.onAction = (e: ActionEvent) => {
+              scene = keyboardScene
             }
             
             slider1.valueProperty().onChange((observable, oldvalue, newvalue) => {
@@ -442,8 +463,66 @@ object Front extends JFXApp {
             
         }
 //-----------------------------------------------------------------------------------------------------------------------------//
+        
+        
+        val keyboardScene: Scene = new Scene(screenWidthHolder, screenHeightHolder) {
+            
+            val keyView = new ImageView(new Image("resources/keyboardLayout.png"))
+            keyView.preserveRatio = true
+            keyView.fitWidth = screenWidthHolder
+            
+            
+            val button1 = new C.Button {
+              text = "Back"
+              font = subHeader
+              layoutX = screenWidthHolder - screenWidthHolder/40.0
+
+            }
+            
+            
+            
+            
+            val grid = new GridPane()
+            grid.add(button1, 0, 0)
+            grid.add(keyView, 0, 1)
+            grid.layoutY = screenHeightHolder /40.0
+            grid.vgap = screenHeightHolder /40.0
+            content = grid
+            
+            stylesheets += "stylesheets/options.css"
+
+//--------------------------------------------------------//
+            
+            // Event handlers 
+            width.onChange((observable, oldvalue, newvalue) => {
+              keyView.fitWidth = newvalue.doubleValue()
+              screenWidthHolder = newvalue.doubleValue()
+            })
+            height.onChange((observable, oldvalue, newvalue) => {
+              grid.vgap = newvalue.doubleValue() / 40.0
+              screenHeightHolder = newvalue.doubleValue()
+            })
+            
+            
+            onKeyPressed = (event: KeyEvent) => {
+                event.code match {
+                  case KeyCode.Escape  =>  scene = options
+                  case KeyCode.F       =>  {
+                    goingFull        = !goingFull
+                  }
+                  case _ =>
+                }
+              }
+              button1.onAction = (e: ActionEvent) => {
+                scene = options
+              }
+        }
+        
+//-----------------------------------------------------------------------------------------------------------------------------//
         val moreRoot = new Group()
         val more: Scene = new Scene(screenWidthHolder, screenHeightHolder) {
+            var currentWidth = this.width.doubleValue()
+            var currentHeight = this.height.doubleValue()
             // Content for the bootstrap and options screens.
             val ds = new DropShadow(200, Color.Black)
             ds.setOffsetX(5)
@@ -466,11 +545,22 @@ object Front extends JFXApp {
               effect = ds
             }
             
-            val menu1 = new C.ComboBox(Seq((4,3),(7,5),(16,9),(21,9))) {
+            val menu1 = new C.ComboBox(Seq("4:3","7:5","16:9","21:9")) {
+              value = "4:3"
               this.onAction = (e: ActionEvent) => {
-                this.value.value._2 /1000.0
-                widthAspect = this.value.value._1
-                heightAspect = this.value.value._2
+                widthAspect = value.value.takeWhile(_!= ':').toInt
+                heightAspect = value.value.dropWhile(_!= ':').drop(1).toInt
+                value = value.value
+                if (widthAspect * base > currentWidth){
+                  val ratio = currentWidth / (widthAspect * base)
+                  screenHeightHolder = heightAspect * base * ratio
+                  screenWidthHolder = currentWidth
+                  
+                  if (screenHeightHolder > currentHeight) {
+                    val ratio = currentHeight / screenHeightHolder
+                    screenWidthHolder = screenWidthHolder * ratio
+                  }
+                }
               }
              
             }
@@ -482,18 +572,48 @@ object Front extends JFXApp {
               font = subHeader
             }
             val textField = new C.TextField {
-              promptText = "e.g. data.csv"
+              promptText = "e.g. house"
+              this.focused.onChange({
+                  text = text.value
+              })
             }
+            val ending = new C.ComboBox(Seq(".csv", ".obj")) {
+              value = ".csv"
+              this.onAction = (e: ActionEvent) => {
+                value = value.value
+              }
+            }
+            val button2 = new C.Button {
+              text = "Load"
+            }
+            val sub = new GridPane
+            sub.add(textField, 0, 0)
+            sub.add(ending, 1, 0)
+            sub.add(button2,2,0)
+            sub.vgap = 3
+            sub.hgap = 3
 //--------------------------------------------------------//
             
             // Performance
             val header3 = new C.Label {
-              text = "Performance"
+              text = "Clipping"
               font = subHeader
             }
+            
+            // Replacing tickbox with a image needs more tuning.
+            
+//            val uncheckedPath : String = CSVReader.fileHelper("unchecked.png")
+//            val help1: Image = new Image("file:" + uncheckedPath) 
+//            val viewI = new ImageView(help1)
+//            viewI.layoutX = 0
+//            val checkedPath : String = CSVReader.fileHelper("checked.png")
+//            val help2: Image = new Image("file:" + checkedPath) 
+//            val viewII = new ImageView(help2)
+            
             val perf = new C.CheckBox {
-              this.selected.onChange(clippingEnabled = !clippingEnabled)
               effect = ds
+              this.selected = true
+//              graphic = viewI
             }
 //--------------------------------------------------------// 
             val button1 = new C.Button {
@@ -524,7 +644,7 @@ object Front extends JFXApp {
             
             // File loading
             grid.add(header6, 2, 1)
-            grid.add(textField, 2, 2)
+            grid.add(sub, 2, 2)
             
             
             grid.add(button1, 2, 0)
@@ -568,32 +688,66 @@ object Front extends JFXApp {
             button1.onAction = (e: ActionEvent) => {
               scene = options
             }
+            
+            
+            val loaded = new C.Label("Loaded succesfully.")
+            val notFound = new C.Label("Please enter file name.")
+            button2.onAction = (e: ActionEvent) => {
+              if (!textField.text.apply.isEmpty()) {
+                    if (ending.value.apply() == ".obj") {
+                      fileIsCSV = false
+                      fileEnding = ".obj"
+                      ending.value = ".obj"
+                    } else {
+                      fileIsCSV = true
+                      fileEnding = ".csv"
+                      ending.value = ".csv"
+                    }
+                    fileName = textField.text.apply.replaceAll("[^A-Za-z0-9()\\[\\]]", "")
+                    if (sub.children.contains(notFound)) {
+                      sub.children.removeAll(notFound)
+                    }
+                    if (sub.children.contains(loaded)) {
+                      sub.children.removeAll(loaded)
+                    }
+                    sub.add(loaded, 4, 0)
+                    
+              } else {
+                    if (sub.children.contains(loaded)) {
+                      sub.children.removeAll(loaded)
+                    }
+                    if (sub.children.contains(notFound)) {
+                      sub.children.removeAll(notFound)
+                    }
+                    sub.add(notFound, 4, 0)
+              }
+            }
+            
+            textField.onKeyPressed = (event: KeyEvent) => {
+              event.code match {
+                case KeyCode.Enter => {
+                  val text = this.textField.text.apply
+                  if (!text.isEmpty()) {
+                    fileName = text.replaceAll("[^A-Za-z0-9()\\[\\]]", "")
+                  } 
+                }
+                case _ => 
+              }
+            }
         }
-//--------------------------------------------------------//
-            
-            
-            
-            
-            
-            
-//--------------------------------------------------------//
-        
-        
-        
         
 //-----------------------------------------------------------------------------------------------------------------------------//
         
         
       // Main screen.
       val threeDRoot = new Group()
-      val threeD: Scene = new Scene(threeDRoot, screenWidthHolder, screenHeightHolder, depthBuffer = true, antiAliasing = SceneAntialiasing.Balanced) {
+      val threeD: Scene = new Scene {
         cursor = Cursor.NONE
         //Drawing happens on the canvas, as it is quicker when dealing with having to re-draw everything every frame.
         val canvas = new Canvas(screenWidthHolder, screenHeightHolder)
         val gc = canvas.graphicsContext2D
 //-----------------------------------------------------------------------------------------------------------------------------------------//
         // Flags, counters, and keepers of game mechanics.
-        
         //Related to jumping
         var velocity = 0.0
         var jumping = false
@@ -638,7 +792,6 @@ object Front extends JFXApp {
               distances = fullData._2.map(triangle => MathHelper.triangleDistanceFromCameraPoint(triangle))
               Camera.roundRotation
               
-              
               // Handling fullscreen transitions
               if (goingFull) {
                 screenWidthHolder = screenSize._1
@@ -646,6 +799,16 @@ object Front extends JFXApp {
               } else {
                 screenWidthHolder = base * widthAspect
                 screenHeightHolder = base * heightAspect
+                if (widthAspect * base > screenSize._1){
+                  val ratio = screenSize._1 / (widthAspect * base)
+                  screenHeightHolder = heightAspect * base * ratio
+                  screenWidthHolder = screenSize._1
+                  
+                  if (screenHeightHolder > screenSize._2) {
+                    val ratio = screenSize._2 / screenHeightHolder
+                    screenWidthHolder = screenWidthHolder * ratio
+                  }
+                }
               }
               handleFullScreen
               canvas.width_=(screenWidthHolder)
@@ -869,11 +1032,17 @@ object Front extends JFXApp {
               gc.fillRoundRect(screenWidthHolder - screenWidthHolder/1.5, screenHeightHolder - screenHeightHolder/ 8.0, scala.math.min(600 * relative, 600),30, 30, 30 )
               
               
-//              println(screenWidthHolder)
               gc.stroke = Color.rgb(61, 153, 122, 1)
               gc.strokeRoundRect(screenWidthHolder - screenWidthHolder/1.5, screenHeightHolder - screenHeightHolder/ 8.0, 600,30, 30, 30 )
               
-              
+              if (dragging) {
+                gc.fill = Color.rgb(61, 153, 122, 0.85)
+                gc.fillRoundRect(screenWidthHolder /2.0 - 300, screenHeightHolder/ 10.0, 600, 100, 30, 30)
+                gc.fill = Color.White
+                gc.setFont(new Font("Segoe UI", 21))
+                gc.fillText("Exit full-screen mode to move window around.", screenWidthHolder /2.0 - 200, screenHeightHolder/ 10.0 + 60)
+                
+              }
               
               
             } // End of the if statement which prevents drawing when application is opening.
@@ -901,6 +1070,36 @@ object Front extends JFXApp {
             case KeyCode.Plus    =>  zoomingIn        = true
             case KeyCode.Minus   =>  zoomingOut       = true
             case KeyCode.Z       =>  Camera.defaultZoom
+            case KeyCode.Left    =>  {
+              if (!goingFull) {
+                stage.setX(-9)
+              }
+            }
+            case KeyCode.Right    =>  {
+              if (!goingFull) {
+                stage.setX(screenSize._1 - stage.width.doubleValue() + 7)
+              }
+            }
+            case KeyCode.Up       =>  {
+              if (!goingFull) {
+                if (stage.y.doubleValue() >= 3.0) {
+                  stage.setY(stage.y.doubleValue() - 5)
+                } else {
+                  stage.setY(-30)
+                }
+              }
+            }
+            case KeyCode.Down       =>  {
+              if (!goingFull) {
+                if (stage.y.doubleValue() <= -29.0) {
+                  stage.setY(0)
+                } else if (stage.y.doubleValue() + 10.0 <= screenSize._2 - stage.height.doubleValue()) {
+                  stage.setY(stage.y.doubleValue() + 1)
+                } else {
+                  screenSize._2 - stage.height.doubleValue()
+                }
+              }
+            }
             case KeyCode.Escape  =>  System.exit(1)
             case _ =>
           }
@@ -947,13 +1146,19 @@ object Front extends JFXApp {
             Camera.rotate(mouseDeltaY * sensitivity / (2*Pi), -mouseDeltaX * sensitivity  / (2*Pi) , 0)
             robot.mouseMove(centerPoint._1.toInt, centerPoint._2.toInt)
         }
+    
         onMouseDragged = (event: MouseEvent) => {
-            mouseDeltaX = event.screenX - centerPoint._1
-            mouseDeltaY = event.screenY - centerPoint._2
-            Camera.rotate(mouseDeltaY * sensitivity / (2*Pi), -mouseDeltaX * sensitivity  / (2*Pi) , 0)
-            robot.mouseMove(centerPoint._1.toInt, centerPoint._2.toInt)
+            if (!goingFull) {
+              stage.setX(event.screenX - screenWidthHolder/2.0 + (event.screenX - centerPoint._1) * 0.5)
+              stage.setY(event.screenY - screenHeightHolder/2.0 + (event.screenY - centerPoint._2)* 0.5)
+            } else {
+              dragging = true
+              
+            }
         }
-
+        onMouseReleased = (event: MouseEvent) => {
+              dragging = false
+        }
  //-------------------------------------------------------------------------------------------//
         
         //Scene settings.
@@ -961,7 +1166,9 @@ object Front extends JFXApp {
         title = "threeD"
       }  // End of scene
       scene = bootstrap
+      
    }     // End of stage
+        
 }        // End of App
 // As seen from the ending above, everything is done inside the scene, on the canvas, within the timer loop.
 

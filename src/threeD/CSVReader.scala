@@ -10,7 +10,7 @@ object CSVReader {
     //Finding the file
       val currentDir = Paths.get(".").toAbsolutePath().normalize().toString()
       val resourcesDir = currentDir + "/src/resources/"
-      resourcesDir + Front.fileName
+      resourcesDir + Front.fileName + Front.fileEnding
   }
   def readCSV: Array[Array[Double]] = {
     try { 
@@ -32,7 +32,7 @@ object CSVReader {
   def fileHelper(name: String) = {
     //Finding the file
       val currentDir = Paths.get(".").toAbsolutePath().normalize().toString()
-      val resourcesDir = currentDir + "/src/resources/"
-      resourcesDir + name
+      val stylesheetsDir = currentDir + "/src/stylesheets/"
+      stylesheetsDir + name
   }
 }

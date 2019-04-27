@@ -55,7 +55,7 @@ object ObjectReader {
     //Finding the file
       val currentDir = Paths.get(".").toAbsolutePath().normalize().toString()
       val resourcesDir = currentDir + "/src/resources/"
-      resourcesDir + Front.objectName
+      resourcesDir + Front.fileName  + Front.fileEnding
   }
     
 }

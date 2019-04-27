@@ -11,9 +11,85 @@
 	-fx-text-fill:  white;
 	-fx-background-color: #3D9970;
 }
+
+
+
 .label {
 	-fx-text-fill:  #3D9970;
 }
 
 
+
+.check-box>.box {
+  -fx-background-color: transparent;
+  -fx-border-color: #3D9970;
+}
+.check-box:armed>.box{
+  -fx-background-color: #3D9970;
+  -fx-opacity: 0.5;
+}
+.check-box:focused>.box{
+  -fx-border-color: black;
+}
+.check-box:hover>.box{
+  -fx-border-color: black;
+}
+.check-box:selected>.box>.mark{
+  -fx-background-color: #3D9970;
+}
+
+
+
+.slider:focused {
+   	-fx-color: #3D9970;
+}
+
+
+
+.combo-box {
+	-fx-background-color: transparent;
+	-fx-border-color:#3D9970;
+}
+.combo-box:focused {
+	-fx-background-color:  #3D9970;
+}
+.combo-box:hover {
+	-fx-background-color:  #3D9970;
+}
+.combo-box-base > .arrow-button > .arrow{
+    -fx-background-color: #3D9970;
+}
+.combo-box-base:hover > .arrow-button > .arrow{
+    -fx-background-color: white;
+}
+.combo-box-base:focused > .arrow-button > .arrow{
+    -fx-background-color: white;
+}
+.combo-box > .list-cell {
+    -fx-text-fill: #3D9970;
+}
+.combo-box:focused > .list-cell{
+    -fx-text-fill: white;
+}
+.combo-box:hover > .list-cell {
+    -fx-text-fill: white;
+}
+
+
+
+
+.text-input {
+    -fx-text-fill: #3D9970;
+    -fx-background-color: transparent;
+    -fx-cursor: text;
+    -fx-border-color: #3D9970;
+}
+.text-input:focused {
+	-fx-text-fill: white;
+    -fx-background-color: #3D9970;
+}
+.text-input:hover {
+	-fx-text-fill: white;
+    -fx-background-color: #3D9970;
+}
 
