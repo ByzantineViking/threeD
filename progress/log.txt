@@ -3,7 +3,7 @@ Built the framework for the project, mainly consisting of setting up ScalaFX dep
 Est Total Time <5 h
 
 10.3: 
-Built the project. Took the ScalaFX app down to the bones, as I don't need much functionality from it.
+Took the ScalaFX app down to the bones, as I don't need much functionality from it.
 At the moment it is running scene, but a migration to canvas is a possibility as it draws everything over each time.
 In either case, remaining problem is figuring out how to control refreshing. Also in the app I built a coordinate converter and 
 a triangle drawer (decided to build the engine around triangles for better future support of varying objects).
@@ -35,3 +35,9 @@ one triangle should be in front but it has two "heavy points" on the back and on
 Built a slope. A lot of debugging. This particular camera transform has proven to be rather tedious, but it is now too integrated in to switch.
 Mostly it manifests itself in the horizontal mirroring.
 Est Total Time <25h
+
+...
+
+
+28.4:
+2267 Lines of code.
