@@ -78,7 +78,7 @@ object Front extends JFXApp {
 //--------------------------------------------------------------------------------//
   
         // Setting the size of the scene
-        val base = 250
+        var base = 250
         var widthAspect = 4
         var heightAspect = 3
         
@@ -538,32 +538,79 @@ object Front extends JFXApp {
             }
             
 //--------------------------------------------------------//
-            // Size
+            // Aspect Ratio
             val header5 = new C.Label {
               text = "Aspect Ratio"
               font = subHeader
               effect = ds
             }
             
-            val menu1 = new C.ComboBox(Seq("4:3","7:5","16:9","21:9")) {
+            val menu1 = new C.ComboBox(Seq("4:3","7:5","16:9","21:9", "9:16")) {
               value = "4:3"
               this.onAction = (e: ActionEvent) => {
                 widthAspect = value.value.takeWhile(_!= ':').toInt
                 heightAspect = value.value.dropWhile(_!= ':').drop(1).toInt
                 value = value.value
-                if (widthAspect * base > currentWidth){
-                  val ratio = currentWidth / (widthAspect * base)
+                if (widthAspect * base > screenSize._1){
+                  val ratio = screenSize._1 / (widthAspect * base)
                   screenHeightHolder = heightAspect * base * ratio
-                  screenWidthHolder = currentWidth
-                  
-                  if (screenHeightHolder > currentHeight) {
-                    val ratio = currentHeight / screenHeightHolder
+                  screenWidthHolder = screenSize._1
+                  if (screenHeightHolder > screenSize._2) {
+                    val ratio = screenSize._2 / screenHeightHolder
                     screenWidthHolder = screenWidthHolder * ratio
+                    screenHeightHolder = screenSize._2
+                   
+                  }
+                } else {
+                  if (base * heightAspect > screenSize._2) {
+                      val ratio = screenSize._2 / (base * heightAspect)
+                      screenWidthHolder = base * widthAspect * ratio
+                      screenHeightHolder= screenSize._2
+                  } else {
+                    screenHeightHolder = heightAspect * base
+                    screenWidthHolder = widthAspect * base
                   }
                 }
               }
              
             }
+//--------------------------------------------------------//
+            // Size
+            val header7 = new C.Label {
+              text = "Size"
+              font = subHeader
+              effect = ds
+            }
+            
+            val menu2 = new C.ComboBox(Seq("puny","small","medium","big", "enormous")) {
+              value = "medium"
+              this.onAction = (e: ActionEvent) => {
+                  value = value.value
+                  value.value match {
+                    case "puny"     => base = 50
+                    case "small"    => base = 175
+                    case "medium"   => base = 250
+                    case "big"      => base = 325
+                    case "enormous" => base = 400
+                  }
+              }
+            }
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
 //--------------------------------------------------------//
             
             // File loading
@@ -637,9 +684,13 @@ object Front extends JFXApp {
             grid.add(header3, 0, 1)
             grid.add(perf, 0, 2)
             
-            // Size
+            // Aspect Ratio
             grid.add(header5, 1, 1)
             grid.add(menu1, 1, 2)
+            
+            // Size
+            grid.add(header7, 1, 4)
+            grid.add(menu2, 1, 5)
             
             
             // File loading
@@ -797,27 +848,35 @@ object Front extends JFXApp {
                 screenWidthHolder = screenSize._1
                 screenHeightHolder = screenSize._2
               } else {
-                screenWidthHolder = base * widthAspect
-                screenHeightHolder = base * heightAspect
                 if (widthAspect * base > screenSize._1){
                   val ratio = screenSize._1 / (widthAspect * base)
                   screenHeightHolder = heightAspect * base * ratio
                   screenWidthHolder = screenSize._1
-                  
                   if (screenHeightHolder > screenSize._2) {
                     val ratio = screenSize._2 / screenHeightHolder
                     screenWidthHolder = screenWidthHolder * ratio
+                    screenHeightHolder = screenSize._2
+                  }
+                } else {
+                  if (base * heightAspect > screenSize._2) {
+                      val ratio = screenSize._2 / (base * heightAspect)
+                      screenWidthHolder = base * widthAspect * ratio
+                      screenHeightHolder= screenSize._2
+                      
+                  } else {
+                    screenHeightHolder = heightAspect * base
+                    screenWidthHolder = widthAspect * base
                   }
                 }
               }
               handleFullScreen
+              
               canvas.width_=(screenWidthHolder)
               canvas.height=(screenHeightHolder)
               
-              
               // Starts the canvas as a white background.
               gc.fill = Color.White
-              gc.fillRect(0,0,screenWidthHolder,screenWidthHolder)
+              gc.fillRect(0,0,screenWidthHolder,screenHeightHolder)
               
         //-------------------------------------------------------------------------------------------//
               
@@ -1029,18 +1088,18 @@ object Front extends JFXApp {
               }
               val relative = staminaLeft / stamina
               gc.fill = Color.rgb(61, 153, 122, .50)
-              gc.fillRoundRect(screenWidthHolder - screenWidthHolder/1.5, screenHeightHolder - screenHeightHolder/ 8.0, scala.math.min(600 * relative, 600),30, 30, 30 )
+              gc.fillRoundRect(screenWidthHolder/2.0 - (screenWidthHolder/2.0)/2.0, screenHeightHolder - screenHeightHolder/ 8.0, scala.math.min((screenWidthHolder/2.0) * relative, (screenWidthHolder/2.0)),30, 30, 30 )
               
-              
+              println(screenWidthHolder)
               gc.stroke = Color.rgb(61, 153, 122, 1)
-              gc.strokeRoundRect(screenWidthHolder - screenWidthHolder/1.5, screenHeightHolder - screenHeightHolder/ 8.0, 600,30, 30, 30 )
+              gc.strokeRoundRect(screenWidthHolder/2.0  - (screenWidthHolder/2.0)/2.0 , screenHeightHolder - screenHeightHolder/ 8.0, screenWidthHolder/2.0,30, 30, 30 )
               
               if (dragging) {
                 gc.fill = Color.rgb(61, 153, 122, 0.85)
-                gc.fillRoundRect(screenWidthHolder /2.0 - 300, screenHeightHolder/ 10.0, 600, 100, 30, 30)
+                gc.fillRoundRect(screenWidthHolder /2.0 - (screenWidthHolder/3.7)/2.0, screenHeightHolder/ 10.0, screenWidthHolder/3.7, 60, 30, 30)
                 gc.fill = Color.White
                 gc.setFont(new Font("Segoe UI", 21))
-                gc.fillText("Exit full-screen mode to move window around.", screenWidthHolder /2.0 - 200, screenHeightHolder/ 10.0 + 60)
+                gc.fillText("Exit full-screen mode to move window around.", screenWidthHolder /2.0 - (screenWidthHolder/3.7)/2.0 + 30, screenHeightHolder/ 10.0 + 60/2.0 + 5)
                 
               }
               
@@ -1072,12 +1131,20 @@ object Front extends JFXApp {
             case KeyCode.Z       =>  Camera.defaultZoom
             case KeyCode.Left    =>  {
               if (!goingFull) {
-                stage.setX(-9)
+                if (stage.x.doubleValue() + stage.width.doubleValue() >= screenSize._1 - 20 ) {
+                  stage.setX((screenSize._1 - stage.width.doubleValue()) / 2.0)
+                } else {
+                  stage.setX(-9)
+                }
               }
             }
             case KeyCode.Right    =>  {
               if (!goingFull) {
-                stage.setX(screenSize._1 - stage.width.doubleValue() + 7)
+                if (stage.x.doubleValue() < 20.0) {
+                  stage.setX((screenSize._1 - stage.width.doubleValue()) / 2.0)
+                } else {
+                  stage.setX(screenSize._1 - stage.width.doubleValue() + 7)
+                }
               }
             }
             case KeyCode.Up       =>  {
@@ -1094,7 +1161,7 @@ object Front extends JFXApp {
                 if (stage.y.doubleValue() <= -29.0) {
                   stage.setY(0)
                 } else if (stage.y.doubleValue() + 10.0 <= screenSize._2 - stage.height.doubleValue()) {
-                  stage.setY(stage.y.doubleValue() + 1)
+                  stage.setY(stage.y.doubleValue() + 3)
                 } else {
                   screenSize._2 - stage.height.doubleValue()
                 }
