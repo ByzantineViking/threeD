@@ -232,7 +232,10 @@ object Writer {
 //    file.write(block(3.5,3.5, 4))
 //    file.write(openBox(2.5,-0.5,2.0))
     
-    
+//    file.write(block(-1.5, -0.5, 2))
+//    file.write(block(-0.5, -1.5, 3))
+//    file.write(block(0.5, -0.5, 2))
+//    file.write(block(-0.5, -1.5, 1))
     
     // A grand staircase.
     file.write(magnificentStairs(0.5,0,1))

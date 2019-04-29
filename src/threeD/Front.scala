@@ -73,7 +73,7 @@ object Front extends JFXApp {
 //--------------------------------------------------------------------------------//
         
          // Clips the triangle behind camera, but decreases performance
-        var clippingEnabled             = false
+        var clippingEnabled             = true
         
 //--------------------------------------------------------------------------------//
   
@@ -240,8 +240,7 @@ object Front extends JFXApp {
             ds.setOffsetX(5)
             ds.setOffsetY(5)
             ds.setColor(Color.Black)
-            
-            
+                        
             
             // Headers
             val header1 = new C.Label {
@@ -660,7 +659,7 @@ object Front extends JFXApp {
             val perf = new C.CheckBox {
               effect = ds
               this.selected = true
-//              graphic = viewI
+              this.selected.onChange(clippingEnabled = !clippingEnabled)
             }
 //--------------------------------------------------------// 
             val button1 = new C.Button {
@@ -895,7 +894,7 @@ object Front extends JFXApp {
                 if (recovering) {
                   if (replenishing) {
                     staminaLeft += 0.01
-                  } else {
+                  } else if (!jumping) {
                     recoveralTimeLeft -= delta
                     if (recoveralTimeLeft <= 0) {
                       replenishing = true
@@ -1090,7 +1089,6 @@ object Front extends JFXApp {
               gc.fill = Color.rgb(61, 153, 122, .50)
               gc.fillRoundRect(screenWidthHolder/2.0 - (screenWidthHolder/2.0)/2.0, screenHeightHolder - screenHeightHolder/ 8.0, scala.math.min((screenWidthHolder/2.0) * relative, (screenWidthHolder/2.0)),30, 30, 30 )
               
-              println(screenWidthHolder)
               gc.stroke = Color.rgb(61, 153, 122, 1)
               gc.strokeRoundRect(screenWidthHolder/2.0  - (screenWidthHolder/2.0)/2.0 , screenHeightHolder - screenHeightHolder/ 8.0, screenWidthHolder/2.0,30, 30, 30 )
               

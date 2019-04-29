@@ -54,7 +54,6 @@ class Matrix(val matrix : Array[Array[Double]] ) {
      }
      new VectorVer(result.toArray)
    }
-   def transpoosi = new Matrix(validMatrix.transpose)
    override def toString()= {
      var output = ""
      for(row <- validMatrix) {

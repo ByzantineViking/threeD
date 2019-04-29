@@ -5,6 +5,24 @@ import scala.math._
 
 // Converter takes the data, and converts it to right form Array[Array[VectorVer]] for projecting.
 object Converter {
+  /**
+   * Sorts the triangles based on their end-points combined distance to the camera.
+   */
+  def sort(array: Array[Array[VectorVer]]): Array[Array[VectorVer]] = {
+        val p: VectorVer = Camera.pos
+        array.sortWith((x, y) => {
+          // All three
+          {sqrt(pow(x(0).x- p.x, 2) + pow(x(0).z- p.z, 2) + pow(x(0).y- p.y, 2))  +
+          sqrt(pow(x(1).x- p.x, 2) + pow(x(1).z- p.z, 2) + pow(x(1).y- p.y, 2))   +
+          sqrt(pow(x(2).x- p.x, 2) + pow(x(2).z- p.z, 2) + pow(x(2).y- p.y, 2))   
+          } > { 
+          sqrt(pow(y(0).x- p.x, 2) + pow(y(0).z- p.z, 2) + pow(y(0).y- p.y, 2))   +
+          sqrt(pow(y(1).x- p.x, 2) + pow(y(1).z- p.z, 2) + pow(y(1).y- p.y, 2))   +
+          sqrt(pow(y(2).x- p.x, 2) + pow(y(2).z- p.z, 2) + pow(y(2).y- p.y, 2))   }
+        })
+    }
+  
+  
   def convertCSV: Array[Array[VectorVer]] = {
     var data:  Array[Array[Double]] = CSVReader.readCSV
     var vectors = Buffer[Array[VectorVer]]()
@@ -17,9 +35,17 @@ object Converter {
       }
       vectors += shapeConverted.toArray
     }
-    Sorter.sort(vectors.toArray)
+    sort(vectors.toArray)
   }
+  /**
+   * Works but Blender's triangles might be defined in a different way,
+   *  so the shapes do not possess the right points in the right order.
+   *  Which is the clock-wise order with all the points of a triangle
+   *  laid back to back.
+   */
   def convertObject: Array[Array[VectorVer]] = {
+    // First I'll group them to be all three points of a triangle on a same row.
+    // Which equals to nine coordinates.
     var data:  Array[Array[Double]] = ObjectReader.readObj
     var holder = Buffer[Double]()
     val triangledData = Buffer[Array[Double]]()
@@ -33,8 +59,7 @@ object Converter {
         holder.clear()
       }
     }
-    
-    
+    // Here the method is the same as above.
     var vectors = Buffer[Array[VectorVer]]()
     for (line <- triangledData.toArray) {
       var shape = line.grouped(3).toArray
@@ -45,7 +70,7 @@ object Converter {
       }
       vectors += shapeConverted.toArray
     }
-    Sorter.sort(vectors.toArray)
+    sort(vectors.toArray)
   }
   
   
