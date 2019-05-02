@@ -1,5 +1,7 @@
 package threeD
-
+/**
+ * Helper class for the clipping against the edges of the canvas.
+ */
 class Vector2D(val x: Double,val y: Double) {
   def cross(another: Vector2D) = {
     this.x * another.y - this.y * another.x

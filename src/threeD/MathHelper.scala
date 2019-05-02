@@ -23,50 +23,6 @@ object MathHelper {
     (triangle(1).minus(triangle(0))).crossProduct(triangle(2).minus(triangle(0)))
   }
   
-  
-  /**
-   * https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
-   */
-  def lineInterSectLine(q: Vector2D, s: Vector2D, p: Vector2D, r: Vector2D): (Option[Vector2D],Option[Vector2D])  = {
-    val t = (q - p).cross(s / (r.cross(s)))
-    val u = (q - p).cross(r / (r.cross(s)))
-    
-    if (r.cross(s) == 0.0 && ((q-p).cross(r) == 0.0)) {
-      // Co-linear
-      if (s*r < 0.0) {
-        // S and R point in different directions
-        val t1 = (q - p) * ( r / (r * r))
-        val t0 = t1 + ((s * r) / (r * r))
-        if (t0 >= 0 && t0 <= 1 && t1 >= 0 && t1 <= 1 ) {
-          (Some(q), Some(q + s))
-        } else {
-          // Colinear and disjoint, no intersection
-          (None, None)
-        }
-      } else {
-        // In the same direction
-        val t0 = (q - p) * ( r / (r * r))
-        val t1 = t0 + ((s * r) / (r * r))
-        if (t0 >= 0 && t0 <= 1 && t1 >= 0 && t1 <= 1 ) {
-          (Some(q), Some(q + s))
-        } else {
-          // Colinear and disjoint, no intersection
-          (None, None)
-        }
-      }
-      
-    } else if (r.cross(s) == 0.0 && (q-p).cross(r) != 0) {
-      (None, None)
-      // Parallel and not-intersecting
-    } else if( r.cross(s) != 0.0 && 0.0 <= t && t <= 1.0 && 0.0 <= u && u <= 1.0 ) {
-      // Intersect
-      // Should be the same as q + s.scalar(u)
-      (Some(p + r.scalar(t)), None)
-    } else {
-      // Not parallel, no intersection
-      (None, None)
-    }
-  }
   // Preferably accuracy would be somewhere around epsilon so cirka 1*10^-6
   // Takes vector between the two points, and shortens it to the intersection point if one exists, otherwise returns None
   /**
@@ -172,9 +128,61 @@ object MathHelper {
   }
   
   
+  
+  
+  
+  
+  
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+  // Under here is a 2D plane clip-helper, and a 3D intersection algorithm with an edge case problem.
+    
+  /**
+   * https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+   */
+  
+//  def lineInterSectLine(q: Vector2D, s: Vector2D, p: Vector2D, r: Vector2D): (Option[Vector2D],Option[Vector2D])  = {
+//    val t = (q - p).cross(s / (r.cross(s)))
+//    val u = (q - p).cross(r / (r.cross(s)))
+//    
+//    if (r.cross(s) == 0.0 && ((q-p).cross(r) == 0.0)) {
+//      // Co-linear
+//      if (s*r < 0.0) {
+//        // S and R point in different directions
+//        val t1 = (q - p) * ( r / (r * r))
+//        val t0 = t1 + ((s * r) / (r * r))
+//        if (t0 >= 0 && t0 <= 1 && t1 >= 0 && t1 <= 1 ) {
+//          (Some(q), Some(q + s))
+//        } else {
+//          // Colinear and disjoint, no intersection
+//          (None, None)
+//        }
+//      } else {
+//        // In the same direction
+//        val t0 = (q - p) * ( r / (r * r))
+//        val t1 = t0 + ((s * r) / (r * r))
+//        if (t0 >= 0 && t0 <= 1 && t1 >= 0 && t1 <= 1 ) {
+//          (Some(q), Some(q + s))
+//        } else {
+//          // Colinear and disjoint, no intersection
+//          (None, None)
+//        }
+//      }
+//      
+//    } else if (r.cross(s) == 0.0 && (q-p).cross(r) != 0) {
+//      (None, None)
+//      // Parallel and not-intersecting
+//    } else if( r.cross(s) != 0.0 && 0.0 <= t && t <= 1.0 && 0.0 <= u && u <= 1.0 ) {
+//      // Intersect
+//      // Should be the same as q + s.scalar(u)
+//      (Some(p + r.scalar(t)), None)
+//    } else {
+//      // Not parallel, no intersection
+//      (None, None)
+//    }
+//  }
+
   /**
    * For defining collision.
-   * Currently doesn't evaluate on collision.
    */
 //  def lineSegmentIntersectWithATriangle(p0: VectorVer, p1: VectorVer, triangle: Array[VectorVer]): Boolean = {
 //   val t0 = triangle(0)

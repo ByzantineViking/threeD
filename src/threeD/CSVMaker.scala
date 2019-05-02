@@ -258,7 +258,6 @@ object Writer {
     for (i <- 0 until length) {
       ret = ret + block(x, z, y+i) + block(x + 2, z, y+i)
     }
-    println(ret)
     ret
   }
   def wideHallwayNorth(x: Double, z: Double, y: Double, length: Int): String = {

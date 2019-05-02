@@ -1,7 +1,9 @@
 package threeD
 
 import scala.math._
-
+/**
+ * Main data structure of the 3D data.
+ */
 class VectorVer(val vector: Array[Array[Double]]) {
     def is1x3 : Option[Array[Array[Double]]] = {
       if (vector.length == 3 && vector.map(_.length).forall(_ == 1)) {

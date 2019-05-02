@@ -27,73 +27,7 @@ object Intersection {
       }
       planeCutData.toArray
   }
-  /**
-   * Clipping in the 2D phase.
-   */
-//  def capToScreenSide(triangle: Array[(Double, Double)], sidePaneTop: Vector2D, sidePaneBottom: Vector2D): Buffer[Vector2D] = {
-//                
-//                val pointA = Vector2D(triangle(0)._1, triangle(0)._2)
-//                val pointAB = Vector2D(triangle(1)._1 - triangle(0)._1, triangle(1)._2 - triangle(0)._2)
-//                
-//                
-//                val pointB = Vector2D(triangle(1)._1, triangle(1)._2)
-//                val pointBC = Vector2D(triangle(2)._1 - triangle(1)._1, triangle(2)._2 - triangle(1)._2)
-//                
-//                val pointC = Vector2D(triangle(2)._1, triangle(2)._2)
-//                val pointCA = Vector2D(triangle(0)._1 - triangle(2)._1, triangle(0)._2 - triangle(2)._2)
-//                
-//                
-//                
-//                val insidePoints = Buffer[Vector2D]()
-//                MathHelper.lineInterSectLine(pointA, pointAB, sidePaneTop, sidePaneBottom - sidePaneTop) match {
-//                  case (Some(sect1), Some(sect2)) => insidePoints.append(sect1, sect2)
-//                  case (Some(sect), None)         => {
-//                    insidePoints.append(sect)
-//                    val ref = sidePaneBottom.sideOf(sidePaneTop, Vector2D(0,0))
-//                    if ((sidePaneBottom.sideOf(sidePaneTop, pointA) >= 0.0 && ref >= 0.0) || (sidePaneBottom.sideOf(sidePaneTop, pointA) <= 0.0 && ref <= 0.0)) {
-//                      // Point is inside, ( same side as reference point (0,0), which is middle of the screen)
-//                      insidePoints.append(pointA)
-//                    } else {
-//                      insidePoints.append(pointB)
-//                    }
-//                  }
-//                  case (None, None)               =>
-//                  case _ => 
-//                }
-//                MathHelper.lineInterSectLine(pointB, pointBC, sidePaneTop, sidePaneBottom - sidePaneTop) match {
-//                  case (Some(sect1), Some(sect2)) => insidePoints.append(sect1, sect2)
-//                  case (Some(sect), None)         => {
-//                    insidePoints.append(sect)
-//                    val ref = sidePaneBottom.sideOf(sidePaneTop, Vector2D(0,0))
-//                    if ((sidePaneBottom.sideOf(sidePaneTop, pointB) >= 0.0 && ref >= 0.0) || (sidePaneBottom.sideOf(sidePaneTop, pointB) <= 0.0 && ref <= 0.0)) {
-//                      // Point is inside, ( same side as reference point (0,0), which is middle of the screen)
-//                      insidePoints.append(pointB)
-//                    } else {
-//                      insidePoints.append(pointC)
-//                    }
-//                  }
-//                  case (None, None)               =>
-//                  case _ => 
-//                }
-//                MathHelper.lineInterSectLine(pointC, pointCA, sidePaneTop, sidePaneBottom - sidePaneTop) match {
-//                  case (Some(sect1), Some(sect2)) => insidePoints.append(sect1, sect2)
-//                  case (Some(sect), None)         => {
-//                    insidePoints.append(sect)
-//                    val ref = sidePaneBottom.sideOf(sidePaneTop, Vector2D(0,0))
-//                    if ((sidePaneBottom.sideOf(sidePaneTop, pointA) >= 0.0 && ref >= 0.0) || (sidePaneBottom.sideOf(sidePaneTop, pointA) <= 0.0 && ref <= 0.0)) {
-//                      // Point is inside, ( same side as reference point (0,0), which is middle of the screen)
-//                      insidePoints.append(pointB)
-//                    } else {
-//                      insidePoints.append(pointA)
-//                    }
-//                  }
-//                  case (None, None)               =>
-//                  case _ => 
-//                }
-//                println(insidePoints.distinct)
-//                insidePoints.distinct
-//              }
-//  
+
   
     /**
    * Takes three points.
@@ -194,4 +128,77 @@ object Intersection {
         
         
   }
+  
+  /**
+   *  Following code can be integrated into the clipping, but it is already rather resource consuming.
+   *  It 
+   */
+  
+    /**
+   * Clipping in the 2D phase.
+   */
+//  def capToScreenSide(triangle: Array[(Double, Double)], sidePaneTop: Vector2D, sidePaneBottom: Vector2D): Buffer[Vector2D] = {
+//                
+//                val pointA = Vector2D(triangle(0)._1, triangle(0)._2)
+//                val pointAB = Vector2D(triangle(1)._1 - triangle(0)._1, triangle(1)._2 - triangle(0)._2)
+//                
+//                
+//                val pointB = Vector2D(triangle(1)._1, triangle(1)._2)
+//                val pointBC = Vector2D(triangle(2)._1 - triangle(1)._1, triangle(2)._2 - triangle(1)._2)
+//                
+//                val pointC = Vector2D(triangle(2)._1, triangle(2)._2)
+//                val pointCA = Vector2D(triangle(0)._1 - triangle(2)._1, triangle(0)._2 - triangle(2)._2)
+//                
+//                
+//                
+//                val insidePoints = Buffer[Vector2D]()
+//                MathHelper.lineInterSectLine(pointA, pointAB, sidePaneTop, sidePaneBottom - sidePaneTop) match {
+//                  case (Some(sect1), Some(sect2)) => insidePoints.append(sect1, sect2)
+//                  case (Some(sect), None)         => {
+//                    insidePoints.append(sect)
+//                    val ref = sidePaneBottom.sideOf(sidePaneTop, Vector2D(0,0))
+//                    if ((sidePaneBottom.sideOf(sidePaneTop, pointA) >= 0.0 && ref >= 0.0) || (sidePaneBottom.sideOf(sidePaneTop, pointA) <= 0.0 && ref <= 0.0)) {
+//                      // Point is inside, ( same side as reference point (0,0), which is middle of the screen)
+//                      insidePoints.append(pointA)
+//                    } else {
+//                      insidePoints.append(pointB)
+//                    }
+//                  }
+//                  case (None, None)               =>
+//                  case _ => 
+//                }
+//                MathHelper.lineInterSectLine(pointB, pointBC, sidePaneTop, sidePaneBottom - sidePaneTop) match {
+//                  case (Some(sect1), Some(sect2)) => insidePoints.append(sect1, sect2)
+//                  case (Some(sect), None)         => {
+//                    insidePoints.append(sect)
+//                    val ref = sidePaneBottom.sideOf(sidePaneTop, Vector2D(0,0))
+//                    if ((sidePaneBottom.sideOf(sidePaneTop, pointB) >= 0.0 && ref >= 0.0) || (sidePaneBottom.sideOf(sidePaneTop, pointB) <= 0.0 && ref <= 0.0)) {
+//                      // Point is inside, ( same side as reference point (0,0), which is middle of the screen)
+//                      insidePoints.append(pointB)
+//                    } else {
+//                      insidePoints.append(pointC)
+//                    }
+//                  }
+//                  case (None, None)               =>
+//                  case _ => 
+//                }
+//                MathHelper.lineInterSectLine(pointC, pointCA, sidePaneTop, sidePaneBottom - sidePaneTop) match {
+//                  case (Some(sect1), Some(sect2)) => insidePoints.append(sect1, sect2)
+//                  case (Some(sect), None)         => {
+//                    insidePoints.append(sect)
+//                    val ref = sidePaneBottom.sideOf(sidePaneTop, Vector2D(0,0))
+//                    if ((sidePaneBottom.sideOf(sidePaneTop, pointA) >= 0.0 && ref >= 0.0) || (sidePaneBottom.sideOf(sidePaneTop, pointA) <= 0.0 && ref <= 0.0)) {
+//                      // Point is inside, ( same side as reference point (0,0), which is middle of the screen)
+//                      insidePoints.append(pointB)
+//                    } else {
+//                      insidePoints.append(pointA)
+//                    }
+//                  }
+//                  case (None, None)               =>
+//                  case _ => 
+//                }
+//                println(insidePoints.distinct)
+//                insidePoints.distinct
+//  
+//              }
 }
