@@ -1,8 +1,13 @@
 # threeD
 
-Project Document 5/2019
+#### Project Document 5/2019  
 
-## 1. Abstract
+- The full project document can be found as [PDF](/src/Document.pdf)  
+
+- Pictures at the end of README, as well as [here](/progress).  
+
+
+## 1. Abstract  
 The project is a from-scratch 3D engine running on Scala FX, written in Scala. Scala FX is
 mostly a re-skin for Java FX and the two are both functional inside the app. I have taken
 some functionality from Java FX, regarding the parts in which Scala FX documentation was
@@ -11,7 +16,7 @@ convertible to the format of three 3d points on a CSV row, each consisting of (x
 coordinates forming a triangle in a clock-wise order. The project has a bug on
 “Projection.scala”, on rows 145, and 146: A plane intersection edge case problem, where
 the values scale too big and get drawn on the wrong corner of the screen.
-## 2. User manual
+## 2. User manual  
 The program is started by launching “Front.scala” as a Scala Application. This opens up the
 starting menu as a window, in which you can operate by using the mouse or keyboard.
 Arrow keys allow movement between buttons, same as tab, and with space you can press
