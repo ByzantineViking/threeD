@@ -37,3 +37,4 @@ shapes is encouraged.
 ![KeyHelp](/progress/keyhelp.png "Controls")
 ![View1](/progress/grand_staircase_2.png "Stairs")
 ![View2](/progress/window.png "Window")
+![View3](/progress/jumping_grounds.png "Blocks")
