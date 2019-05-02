@@ -73,7 +73,7 @@ object Front extends JFXApp {
 //--------------------------------------------------------------------------------//
         
          // Clips the triangle behind camera, but decreases performance
-        var clippingEnabled             = true
+        var clippingEnabled             = false
         
 //--------------------------------------------------------------------------------//
   
@@ -642,7 +642,7 @@ object Front extends JFXApp {
             
             // Performance
             val header3 = new C.Label {
-              text = "Clipping"
+              text = "Extra clipping"
               font = subHeader
             }
             
@@ -658,7 +658,7 @@ object Front extends JFXApp {
             
             val perf = new C.CheckBox {
               effect = ds
-              this.selected = true
+              this.selected = false
               this.selected.onChange(clippingEnabled = !clippingEnabled)
             }
 //--------------------------------------------------------// 
@@ -1053,7 +1053,17 @@ object Front extends JFXApp {
               
               // Helper function to rebase the coordinate system to the screen.
               def convertToCanvas(x : (Double, Double)): (Int, Int) = {
-                    ((((x._1 + 1.0)/2.0) * screenWidthHolder).toInt, ((x._2 + 1)/2 * screenHeightHolder).toInt)
+                var toBeAdded = 1.0
+                if (x._1.abs > 100000) {
+                  toBeAdded = 0.0 
+                }
+                if (x._2.abs > 100000) {
+                  toBeAdded = 0.0 
+                }
+                    val croppedX = (scala.math.min(scala.math.max((x._1 + toBeAdded)/2.0 , -screenSize._1 /2.0),screenSize._1 /2.0) * screenWidthHolder).toInt
+                    val croppedY = (scala.math.min(scala.math.max(((x._2 + toBeAdded)/2.0) , -10000.0),10000.0) * screenHeightHolder).toInt
+//                    println((croppedX, croppedY))
+                    (croppedX, croppedY)
               }
               val max: Double = {
                 if (distances.isEmpty) {
@@ -1062,10 +1072,15 @@ object Front extends JFXApp {
                   distances.max
                 }
               }
+              
+              
+              
               for (index <- data.indices) {
                 if (data(index).length == 3) {
+                  
+                  
                   gc.stroke = Color.Black
-                  gc.strokePolygon(data(index).map(x => (convertToCanvas(x)._1.toDouble, convertToCanvas(x)._2.toDouble) ) )
+                  gc.strokePolygon(data(index).map(x => (convertToCanvas(x)._1.toDouble, convertToCanvas(x)._2.toDouble) ) ) 
                   
                   // ENABLE ONE OF FOLLOWING
                   
@@ -1073,6 +1088,7 @@ object Front extends JFXApp {
 //                  gc.fill = Color.FireBrick.deriveColor(0, 1, 1.2- distances(index)/max, 1)
                   
                   // Darkness scales relative to distance, personal favourite
+                  
                   gc.fill = Color.FireBrick.deriveColor(0, 1, 1 - distances(index)/20.0, 1)
                   
                   gc.fillPolygon(data(index).map(x => (convertToCanvas(x)._1.toDouble, convertToCanvas(x)._2.toDouble) ) )

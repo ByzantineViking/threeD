@@ -39,6 +39,12 @@ object Camera {
   }
   def rotationVector: VectorVer = new VectorVer(Array(Array(sin(horizontal)*1.0), Array(-sin(vertical)* 1.0), Array(cos(horizontal*1.0))))
   
+  /**
+   * Helper to get the side and top/bottom 3D clippings against planes.
+   */
+  def rotatedRotationVector(ver: Double, hor: Double) : VectorVer = VectorVer(sin(horizontal + hor), -sin(vertical + ver), cos(horizontal + hor))
+  
+  
   // The drawing distance. If the last value is negative, everything is inverted horizontally (across a vertical line),
   // and if the last value is positive, everything is inverted vertically (across a horizontal line).
   // The viewing plane in front of camera
@@ -70,20 +76,27 @@ object Camera {
   def move(xMovement: Double,zMovement: Double,yMovement: Double): Unit = {
     val oldPos = pos
     val possibleNewPos = new VectorVer(Array(Array(pos.x + xMovement),Array(pos.z + zMovement), Array(pos.y + yMovement)))
+    var moving = true
     for (triangle <- Front.fullData._2) {
-        MathHelper.lineInterSectPlane(oldPos, possibleNewPos, triangle(0), MathHelper.normal(triangle).normalize, pow(10, -4)) match {
-          case Some(intersection) => {
-            val a = MathHelper.distanceFromPlane(intersection, triangle(0), MathHelper.normal(triangle).normalize)
-            val b = MathHelper.distanceFromPlane(oldPos, triangle(0), MathHelper.normal(triangle).normalize)
-            val c = MathHelper.distanceFromPlane(possibleNewPos, triangle(0), MathHelper.normal(triangle).normalize)
-            if (a >= c && a <= b) {
-              pos = oldPos
-            } else {
-              pos = possibleNewPos
+      MathHelper.lineInterSectPlane(oldPos, possibleNewPos, triangle(0), MathHelper.normal(triangle), pow(10,-6)) match {
+        case Some(sect) => {
+          if (MathHelper.minsAndMaxesOfTriangleCoordinates(sect, triangle)) {
+            if (MathHelper.normal(triangle).normalize.dotProduct(possibleNewPos.minus(oldPos).normalize) < 0) {
+              if (MathHelper.distanceFromPlane(possibleNewPos, triangle(0), MathHelper.normal(triangle).normalize) < 0.1) {
+                moving = false
+              }
             }
+            
+          }  else {
           }
-          case None               => pos = possibleNewPos
         }
+        case None       => {
+          
+        }
+      }
+    }
+    if (moving) {
+      pos = possibleNewPos
     }
   }
   def moveTo(xPos: Double, zPos: Double, yPos: Double): Unit = {

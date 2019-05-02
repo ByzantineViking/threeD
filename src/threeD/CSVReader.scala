@@ -5,6 +5,9 @@ import java.lang.NumberFormatException
 import scala.collection.mutable.Buffer
 import java.nio.file.Path
 import java.nio.file.Paths
+/**
+ * Reads CSV files, when spesified in the options.
+ */
 object CSVReader {
   def filePath: String = {
     //Finding the file

@@ -92,12 +92,20 @@ object Projector {
     }
     val rotation = Camera.rotation
     val cameraPos = Camera.pos
-    
     /**
      * Limited functionality.
      */
+    
+    
+    /**
+     * Following handles the clipping against a cone-like shape in front of camera
+     */
+    data = Intersection.intersectWithCameraPlane(data, Camera.rotationVector, VectorVer(0,0,0))
     if(Front.clippingEnabled) {
-      data = Intersection.intersectWithCameraPlane(data)
+      data = Intersection.intersectWithCameraPlane(data, Camera.rotatedRotationVector(0, Pi / 8.0), VectorVer(-0.5,0,0))
+      data = Intersection.intersectWithCameraPlane(data, Camera.rotatedRotationVector(0, -Pi / 8.0), VectorVer(0.5,0,0))
+      data = Intersection.intersectWithCameraPlane(data, Camera.rotatedRotationVector(Pi / 8.0, 0), VectorVer(0,0.5,0))
+      data = Intersection.intersectWithCameraPlane(data, Camera.rotatedRotationVector(-Pi / 8.0, 0), VectorVer(0,-0.5,0))
     }
     
     // Selects only those whose normals point to the direction of the camera.
@@ -131,8 +139,11 @@ object Projector {
       val shapeReformated = Buffer[(Double,Double)]()
       for  (point <- shape) {
         val transformedIn3D: VectorVer = (transform.multiplyWithVector(point.minus(cameraPos)))
-        val x: Double = (e(2)/transformedIn3D.y)* transformedIn3D.x + e(0)
-        val y: Double = (e(2)/transformedIn3D.y) * transformedIn3D.z + e(1)
+        /** 
+         *  Here the double gets too big of a value, and tends to flip around to the negative/positive side of the screen.
+         */
+        val x: Double = max(min(e(2)/max(min(transformedIn3D.y, 100), -100.0) * max(min(transformedIn3D.x,100), -100) + e(0), 100), -100)
+        val y: Double = max(min(e(2)/max(min(transformedIn3D.y, 100), -100.0) * max(min(transformedIn3D.z,100), -100) + e(0), 100), -100)
         val projected: (Double, Double) = (x,y)
         shapeReformated.append(projected)
       }
